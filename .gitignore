@@ -1,0 +1,8 @@
+__pycache__/
+*.py[cod]
+.DS_Store
+Thumbs.db
+progress.json
+progress_report.md
+agent_chat.json
+learner_profile.json

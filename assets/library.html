@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Day-Up · 个人精读书库</title>
+<style>
+:root {
+  --bg: #f6f5f0; --paper: #ffffff; --surface: #f0eee7; --ink: #18181b;
+  --muted: #6c6a63; --border: #e5e2d9; --border-strong: #cfc9bc;
+  --brand: #1f2937; --brand-ink: #ffffff; --accent: #9a3412; --accent-soft: #f9ede8;
+  --warn: #a15214;
+  --font-serif: "Noto Serif SC", "Source Han Serif SC", "Songti SC", Georgia, serif;
+  --font-ui: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
+}
+html[data-theme="sepia"] {
+  --bg: #efe8d8; --paper: #f8f3e6; --surface: #e8dec8; --ink: #2a2117;
+  --muted: #766754; --border: #dfd4bd; --border-strong: #c5b698;
+  --brand: #3c2f21; --brand-ink: #f8f3e6; --accent: #8c3b1b; --accent-soft: #efe2d5;
+}
+html[data-theme="dark"] {
+  --bg: #131416; --paper: #1b1c1f; --surface: #23252a; --ink: #ecebe6;
+  --muted: #93928b; --border: #2c2e35; --border-strong: #41444e;
+  --brand: #ecebe6; --brand-ink: #131416; --accent: #e08b63; --accent-soft: #2e221d;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-ui);
+  line-height: 1.55; min-height: 100vh;
+}
+.page { max-width: 1040px; margin: 0 auto; padding: 28px 24px 72px; }
+
+/* 顶部独立书房报头 */
+.masthead {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  gap: 16px; flex-wrap: wrap; padding-bottom: 20px;
+  border-bottom: 1px solid var(--border); margin-bottom: 20px;
+}
+.brand { display: flex; align-items: baseline; gap: 12px; }
+.brand h1 {
+  margin: 0; font-family: var(--font-serif); font-size: 26px; font-weight: 700;
+  letter-spacing: -0.01em; color: var(--ink);
+}
+.brand-sub { font-size: 13px; color: var(--muted); }
+.theme-seg {
+  display: inline-flex; border: 1px solid var(--border); border-radius: 999px;
+  padding: 2px; background: var(--paper); gap: 2px;
+}
+.theme-seg button {
+  border: 0; background: transparent; color: var(--muted); font-size: 12px;
+  padding: 4px 10px; border-radius: 999px; cursor: pointer; font-family: var(--font-ui);
+}
+.theme-seg button[aria-pressed="true"] {
+  background: var(--brand); color: var(--brand-ink); font-weight: 500;
+}
+
+/* 筛选与检索工具条 */
+.toolbar {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; flex-wrap: wrap; margin-bottom: 18px;
+}
+.tabs { display: inline-flex; gap: 6px; flex-wrap: wrap; }
+.tab-btn {
+  height: 34px; padding: 0 13px; border: 1px solid transparent; border-radius: 999px;
+  background: transparent; color: var(--muted); font-size: 13px; cursor: pointer;
+  font-family: var(--font-ui); transition: all 0.14s ease;
+}
+.tab-btn:hover { background: var(--surface); color: var(--ink); }
+.tab-btn[aria-pressed="true"] {
+  background: var(--paper); border-color: var(--border-strong); color: var(--ink); font-weight: 600;
+}
+.tools-right { display: flex; align-items: center; gap: 8px; flex: 1 1 280px; justify-content: flex-end; }
+.search-wrap { position: relative; flex: 0 1 280px; width: 100%; }
+.search-wrap input {
+  width: 100%; height: 36px; padding: 0 12px 0 34px;
+  border: 1px solid var(--border); border-radius: 999px;
+  background: var(--paper); color: var(--ink); font-size: 13px; font-family: var(--font-ui);
+  outline: none; transition: border-color 0.14s ease;
+}
+.search-wrap input:focus { border-color: var(--border-strong); }
+.search-wrap svg {
+  position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+  color: var(--muted); pointer-events: none;
+}
+.sort-sel {
+  height: 36px; padding: 0 10px; border: 1px solid var(--border); border-radius: 999px;
+  background: var(--paper); color: var(--muted); font-size: 12.5px; font-family: var(--font-ui);
+  cursor: pointer; outline: none;
+}
+
+/* 原创编辑风书目条 */
+.book-list { display: flex; flex-direction: column; gap: 12px; }
+.book-card {
+  display: flex; align-items: center; gap: 18px; position: relative;
+  background: var(--paper); border: 1px solid var(--border); border-radius: 10px;
+  padding: 16px 20px; transition: border-color 0.15s ease, transform 0.14s ease;
+}
+.book-card:hover { border-color: var(--border-strong); transform: translateY(-1px); }
+
+.book-cover {
+  width: 58px; height: 80px; flex-shrink: 0; display: block; border-radius: 5px;
+  overflow: hidden; text-decoration: none; border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+.book-cover img, .book-cover svg { width: 100%; height: 100%; display: block; object-fit: cover; }
+
+.book-body { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 5px; }
+.title-line { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.book-title {
+  font-family: var(--font-serif); font-size: 18px; font-weight: 700; color: var(--ink);
+  text-decoration: none; line-height: 1.35;
+}
+.book-title:hover { color: var(--accent); }
+.chap-pill {
+  font-size: 11.5px; padding: 1px 8px; border-radius: 999px;
+  background: var(--surface); color: var(--muted); white-space: nowrap;
+}
+.book-sub {
+  font-size: 13px; color: var(--muted);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+.meta-line {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 8px 12px;
+  margin-top: 4px; font-size: 12px; color: var(--muted);
+}
+.prog-track { width: 76px; height: 4px; border-radius: 99px; background: var(--surface); overflow: hidden; }
+.prog-fill { height: 100%; background: var(--accent); border-radius: 99px; }
+.tag-chip {
+  font-size: 11.5px; padding: 1px 8px; border-radius: 999px;
+  background: var(--surface); color: var(--ink); border: 0; cursor: pointer;
+  font-family: var(--font-ui); text-decoration: none;
+}
+.tag-chip:hover { background: var(--accent-soft); color: var(--accent); }
+.tag-chip.is-warn { background: var(--accent-soft); color: var(--warn); }
+.tag-add {
+  font-size: 11.5px; padding: 1px 7px; border-radius: 999px;
+  border: 1px dashed var(--border-strong); background: transparent; color: var(--muted);
+  cursor: pointer; font-family: var(--font-ui);
+}
+.tag-add:hover { border-color: var(--accent); color: var(--accent); }
+.tag-editor { display: inline-flex; align-items: center; gap: 4px; }
+.tag-editor input {
+  height: 22px; width: 120px; padding: 0 7px; font-size: 11.5px;
+  border: 1px solid var(--border-strong); border-radius: 999px;
+  background: var(--paper); color: var(--ink); outline: none;
+}
+
+/* 右侧主按钮与轻操作组 */
+.book-side { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.btn-read {
+  height: 34px; padding: 0 14px; border-radius: 999px;
+  background: var(--brand); color: var(--brand-ink);
+  font-size: 12.5px; font-weight: 500; text-decoration: none;
+  display: inline-flex; align-items: center; gap: 5px; white-space: nowrap;
+  transition: opacity 0.14s ease;
+}
+.btn-read:hover { opacity: 0.88; }
+.icon-btn {
+  width: 32px; height: 32px; border: 1px solid var(--border); border-radius: 999px;
+  background: var(--paper); color: var(--muted); cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  text-decoration: none; transition: all 0.14s ease;
+}
+.icon-btn:hover { border-color: var(--border-strong); color: var(--ink); background: var(--surface); }
+.icon-btn.is-fav { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+
+.toc-pop {
+  position: absolute; right: 20px; top: calc(100% - 6px); z-index: 40;
+  width: 320px; background: var(--paper); border: 1px solid var(--border-strong);
+  border-radius: 8px; box-shadow: 0 10px 28px rgba(0, 0, 0, 0.1);
+  padding: 14px 16px; font-size: 12.5px; color: var(--ink);
+}
+.toc-pop h4 { margin: 0 0 8px; font-family: var(--font-serif); font-size: 14px; }
+.toc-pop ul { margin: 0; padding: 0 0 0 16px; max-height: 200px; overflow-y: auto; }
+.toc-pop li { margin: 3px 0; }
+.toc-pop li.locked { color: var(--muted); }
+.toc-pop-foot {
+  margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border);
+  font-size: 11.5px; color: var(--muted); display: flex; justify-content: space-between;
+}
+
+.empty {
+  background: var(--paper); border: 1px dashed var(--border-strong); border-radius: 10px;
+  padding: 56px 24px; text-align: center; color: var(--muted);
+}
+.empty h2 { margin: 0 0 6px; font-family: var(--font-serif); font-size: 18px; color: var(--ink); }
+
+@media (max-width: 760px) {
+  .page { padding: 18px 14px 48px; }
+  .tools-right { justify-content: flex-start; }
+  .book-card { flex-wrap: wrap; gap: 12px; padding: 14px; }
+  .book-side { width: 100%; justify-content: flex-end; border-top: 1px solid var(--border); padding-top: 10px; }
+}
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="masthead">
+    <div class="brand">
+      <h1>Day-Up</h1>
+      <span class="brand-sub" id="book-count">个人精读书库</span>
+    </div>
+    <div class="theme-seg" role="group" aria-label="阅读主题">
+      <button type="button" data-theme="light" aria-pressed="true">纸白</button>
+      <button type="button" data-theme="sepia" aria-pressed="false">羊皮</button>
+      <button type="button" data-theme="dark" aria-pressed="false">墨夜</button>
+    </div>
+  </header>
+
+  <div class="toolbar">
+    <div class="tabs" role="group" aria-label="书目分组">
+      <button type="button" class="tab-btn" data-scope="all" aria-pressed="true">全部</button>
+      <button type="button" class="tab-btn" data-scope="studying" aria-pressed="false">在读</button>
+      <button type="button" class="tab-btn" data-scope="bookmarked" aria-pressed="false">收藏</button>
+      <button type="button" class="tab-btn" data-scope="doubts" aria-pressed="false">待解疑问</button>
+    </div>
+    <div class="tools-right">
+      <div class="search-wrap">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="20" y1="20" x2="16.65" y2="16.65"/></svg>
+        <input id="lib-search" type="search" placeholder="搜索书名、章节或标签…" aria-label="搜索教材">
+      </div>
+      <select class="sort-sel" id="lib-date" aria-label="时间筛选">
+        <option value="all">全部时间</option>
+        <option value="1">今天</option>
+        <option value="7">近 7 天</option>
+        <option value="30">近 30 天</option>
+      </select>
+    </div>
+  </div>
+
+  <main class="book-list" id="book-list"></main>
+</div>
+
+<script>
+(function () {
+  const BOOKS = {{BOOKS_JSON}};
+  const UI_KEY = "dayup_ui_prefs_v1";
+  let activeScope = "all";
+  let openTocSlug = "";
+  let editingTagSlug = "";
+
+  // 独立出版社单色/低饱和书封调色板
+  const MONOGRAPH_THEMES = [
+    { bg: "#262523", line: "#c87a53", ink: "#f7f4ec", sub: "#b8b2a6" },
+    { bg: "#f4f1e8", line: "#8c3b1b", ink: "#1f1d1a", sub: "#756f63" },
+    { bg: "#27342f", line: "#9db8a8", ink: "#f3f6f4", sub: "#aebcb4" },
+    { bg: "#32272c", line: "#d19c97", ink: "#f8f4f5", sub: "#c2b3b8" },
+    { bg: "#252c38", line: "#98a9c4", ink: "#f2f4f8", sub: "#adb7c7" },
+  ];
+
+  const SCOPE_FILTERS = {
+    all: () => true,
+    bookmarked: (b) => !!b.bookmarked,
+    studying: (b) => b.mastered_count > 0 || !!b.active_location,
+    doubts: (b) => b.doubt_count > 0,
+  };
+
+  function esc(s) {
+    return String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  }
+
+  function pickTheme(key) {
+    let h = 0;
+    for (let i = 0; i < key.length; i++) h = (h * 31 + key.charCodeAt(i)) >>> 0;
+    return MONOGRAPH_THEMES[h % MONOGRAPH_THEMES.length];
+  }
+
+  // 生成极简独立书坊风格的书封缩略图
+  function makeCoverSvg(book) {
+    const p = pickTheme(book.slug || book.title);
+    const t = String(book.title || "教材").trim();
+    const vol = book.total_chapters > 0 ? `${book.total_chapters} CH` : "BOOK";
+    return `<svg viewBox="0 0 58 80" xmlns="http://www.w3.org/2000/svg">
+      <rect width="58" height="80" fill="${p.bg}"/>
+      <rect width="4" height="80" fill="rgba(0,0,0,0.18)"/>
+      <rect x="9" y="10" width="16" height="2" fill="${p.line}"/>
+      <text x="9" y="25" fill="${p.ink}" font-size="8.2" font-weight="700" font-family="serif">${esc(t.slice(0, 5))}</text>
+      <text x="9" y="36" fill="${p.ink}" font-size="7.8" font-weight="600" font-family="serif">${esc(t.slice(5, 10))}</text>
+      <text x="9" y="69" fill="${p.sub}" font-size="5.5" font-family="sans-serif" letter-spacing="0.6">${esc(vol)}</text>
+    </svg>`;
+  }
+
+  function applyTheme(t) {
+    document.documentElement.setAttribute("data-theme", t);
+    document.querySelectorAll("[data-theme]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.theme === t)));
+    const cur = JSON.parse(localStorage.getItem(UI_KEY) || "{}");
+    cur.theme = t;
+    localStorage.setItem(UI_KEY, JSON.stringify(cur));
+  }
+
+  function saveBookMeta(slug, patch) {
+    return fetch("/api/library/meta", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(Object.assign({ slug }, patch)),
+    });
+  }
+
+  function matchBook(b, q, days, scopeFn, nowSec) {
+    if (!scopeFn(b)) return false;
+    if (days !== "all" && nowSec - (b.mtime_ts || 0) > Number(days) * 86400) return false;
+    if (!q) return true;
+    const hay = [b.title, b.subtitle, b.slug, (b.tags || []).join(" "), (b.chapters || []).map((c) => c.title).join(" ")].join(" ").toLowerCase();
+    return hay.includes(q);
+  }
+
+  function buildTocPop(b) {
+    if (openTocSlug !== b.slug) return "";
+    const items = (b.chapters || []).map((c) => `<li class="${c.unlocked ? "" : "locked"}">第 ${esc(c.num)} 章 ${esc(c.title)}${c.unlocked ? "" : "（待学）"}</li>`).join("");
+    const acc = b.quiz_accuracy != null ? `自测 ${b.quiz_accuracy}%` : b.format_size;
+    return `<div class="toc-pop"><h4>全书目录（已解锁 ${b.unlocked_chapters}/${b.total_chapters || b.unlocked_chapters} 章）</h4><ul>${items || "<li>暂无目录</li>"}</ul><div class="toc-pop-foot"><span>${esc(b.updated_at)}</span><span>${esc(acc)}</span></div></div>`;
+  }
+
+  function buildTagLine(b) {
+    const chips = (b.tags || []).map((tg) => `<button type="button" class="tag-chip" data-filter-tag="${esc(tg)}">#${esc(tg)}</button>`).join("");
+    const doubt = b.doubt_count > 0 ? `<a class="tag-chip is-warn" href="${esc(b.url)}">${b.doubt_count} 处疑问</a>` : "";
+    const edit = editingTagSlug === b.slug
+      ? `<span class="tag-editor"><input id="tag-inp-${esc(b.slug)}" placeholder="逗号分隔回车" value="${esc((b.tags || []).join(", "))}"><button type="button" class="tag-add" data-save-tag="${esc(b.slug)}">存</button></span>`
+      : `<button type="button" class="tag-add" data-edit-tag="${esc(b.slug)}">+ 标签</button>`;
+    return chips + doubt + edit;
+  }
+
+  function buildCardHtml(b) {
+    const pct = b.total_sections > 0 ? Math.round((b.mastered_count / b.total_sections) * 100) : 0;
+    const chapBadge = b.total_chapters > 0 ? `${b.unlocked_chapters} / ${b.total_chapters} 章` : `${b.unlocked_chapters} 章`;
+    const progTxt = b.total_sections > 0 ? `已掌握 ${b.mastered_count}/${b.total_sections} 节` : "尚未开始";
+    const cover = b.cover_url ? `<img src="${esc(b.cover_url)}" alt="${esc(b.title)}">` : makeCoverSvg(b);
+    const readLabel = b.mastered_count > 0 || b.active_location ? "继续阅读" : "开始阅读";
+    const starFill = b.bookmarked ? "currentColor" : "none";
+    return `<article class="book-card" data-slug="${esc(b.slug)}">
+      <a class="book-cover" href="${esc(b.url)}" aria-label="打开 ${esc(b.title)}">${cover}</a>
+      <div class="book-body">
+        <div class="title-line"><a class="book-title" href="${esc(b.url)}">${esc(b.title)}</a><span class="chap-pill">${esc(chapBadge)}</span></div>
+        ${b.subtitle ? `<div class="book-sub" title="${esc(b.subtitle)}">${esc(b.subtitle)}</div>` : ""}
+        <div class="meta-line">
+          <div class="prog-track"><div class="prog-fill" style="width:${pct}%"></div></div>
+          <span>${esc(progTxt)}</span>
+          ${b.active_location ? `<span>· ${esc(b.active_location)}</span>` : ""}
+          ${buildTagLine(b)}
+        </div>
+      </div>
+      <div class="book-side">
+        <a class="btn-read" href="${esc(b.url)}">${readLabel} →</a>
+        <button type="button" class="icon-btn ${b.bookmarked ? "is-fav" : ""}" data-toggle-bm="${esc(b.slug)}" title="收藏教材"><svg width="14" height="14" viewBox="0 0 24 24" fill="${starFill}" stroke="currentColor" stroke-width="1.9"><polygon points="12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3 12 2"/></svg></button>
+        <button type="button" class="icon-btn" data-toggle-toc="${esc(b.slug)}" title="目录速览"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></svg></button>
+        <a class="icon-btn" href="${esc(b.download_url)}" title="导出离线 HTML"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></a>
+      </div>
+      ${buildTocPop(b)}
+    </article>`;
+  }
+
+  function bindTagInput() {
+    const inp = editingTagSlug && document.getElementById("tag-inp-" + editingTagSlug);
+    if (!inp) return;
+    inp.focus();
+    inp.onkeydown = (e) => {
+      if (e.key === "Enter") commitTags(editingTagSlug, inp.value);
+      if (e.key === "Escape") { editingTagSlug = ""; render(); }
+    };
+  }
+
+  function render() {
+    const q = (document.getElementById("lib-search").value || "").trim().toLowerCase();
+    const days = document.getElementById("lib-date").value;
+    const scopeFn = SCOPE_FILTERS[activeScope] || SCOPE_FILTERS.all;
+    const list = BOOKS.filter((b) => matchBook(b, q, days, scopeFn, Math.floor(Date.now() / 1000)));
+    document.getElementById("book-count").textContent = `个人精读书库 · 共 ${list.length} 册`;
+    const host = document.getElementById("book-list");
+    host.innerHTML = list.length
+      ? list.map(buildCardHtml).join("")
+      : `<div class="empty"><h2>${BOOKS.length ? "没有匹配的教材" : "书库暂无教材"}</h2><p>${BOOKS.length ? "换个关键词或分组看看。" : "用 day-up 生成教材放入书库后刷新即可。"}</p></div>`;
+    bindTagInput();
+  }
+
+  function commitTags(slug, rawVal) {
+    const tags = String(rawVal || "").split(/[,，\s]+/).map((s) => s.trim()).filter(Boolean);
+    const bk = BOOKS.find((x) => x.slug === slug);
+    if (bk) bk.tags = tags;
+    editingTagSlug = "";
+    render();
+    saveBookMeta(slug, { tags });
+  }
+
+  const CARD_ACTIONS = [
+    ["[data-toggle-bm]", (el) => {
+      const bk = BOOKS.find((x) => x.slug === el.dataset.toggleBm);
+      if (!bk) return;
+      bk.bookmarked = !bk.bookmarked;
+      render();
+      saveBookMeta(bk.slug, { bookmarked: bk.bookmarked });
+    }],
+    ["[data-toggle-toc]", (el) => {
+      openTocSlug = openTocSlug === el.dataset.toggleToc ? "" : el.dataset.toggleToc;
+      render();
+    }],
+    ["[data-edit-tag]", (el) => {
+      editingTagSlug = editingTagSlug === el.dataset.editTag ? "" : el.dataset.editTag;
+      render();
+    }],
+    ["[data-save-tag]", (el) => {
+      const inp = document.getElementById("tag-inp-" + el.dataset.saveTag);
+      commitTags(el.dataset.saveTag, inp ? inp.value : "");
+    }],
+    ["[data-filter-tag]", (el) => {
+      document.getElementById("lib-search").value = el.dataset.filterTag;
+      render();
+    }],
+  ];
+
+  document.getElementById("book-list").addEventListener("click", (e) => {
+    for (const [sel, fn] of CARD_ACTIONS) {
+      const hit = e.target.closest(sel);
+      if (hit) { fn(hit); return; }
+    }
+  });
+  document.addEventListener("click", (e) => {
+    if (openTocSlug && !e.target.closest(".toc-pop,[data-toggle-toc]")) { openTocSlug = ""; render(); }
+  });
+  document.querySelectorAll("[data-scope]").forEach((btn) => btn.addEventListener("click", () => {
+    activeScope = btn.dataset.scope;
+    document.querySelectorAll("[data-scope]").forEach((b) => b.setAttribute("aria-pressed", String(b === btn)));
+    render();
+  }));
+  const savedTheme = JSON.parse(localStorage.getItem(UI_KEY) || "{}").theme;
+  if (savedTheme) applyTheme(savedTheme);
+  document.querySelectorAll("[data-theme]").forEach((b) => b.addEventListener("click", () => applyTheme(b.dataset.theme)));
+  document.getElementById("lib-search").addEventListener("input", render);
+  document.getElementById("lib-date").addEventListener("change", render);
+  render();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light" data-mode="scroll">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{PAGE_TITLE}}</title>
+<style>
+{{INLINE_CSS}}
+</style>
+</head>
+<body>
+<header class="topbar" role="banner">
+  <div class="topbar-group">
+    <a class="tb-btn" id="btn-back-library" href="/" hidden aria-label="返回统一书架" title="返回统一书架">‹ <span class="tb-hide-sm">书架</span></a>
+    <button type="button" class="tb-btn" id="btn-toc" aria-label="展开或收起目录">☰ <span class="tb-hide-sm">目录</span></button>
+    <button type="button" class="tb-btn" id="btn-prev" aria-label="上一页或上一节">‹ <span class="tb-hide-sm" id="lbl-prev">上一节</span></button>
+    <div class="tb-progress" aria-label="阅读进度">
+      <div class="tb-progress-bar" aria-hidden="true"><div class="tb-progress-fill" id="tb-pct-fill"></div></div>
+      <span id="tb-pct">0%</span>
+    </div>
+    <button type="button" class="tb-btn" id="btn-next" aria-label="下一页或下一节"><span class="tb-hide-sm" id="lbl-next">下一节</span> ›</button>
+  </div>
+  <div class="topbar-group">
+    <div class="mode-seg" role="group" aria-label="阅读排版模式">
+      <button type="button" data-set-mode="scroll" aria-pressed="true" title="整本连贯滚读">连贯</button>
+      <button type="button" data-set-mode="paged" aria-pressed="false" title="仿真书页翻页">翻页</button>
+    </div>
+    <button type="button" class="tb-btn tb-btn-icon" id="btn-font-dec" aria-label="减小字号">A−</button>
+    <button type="button" class="tb-btn tb-btn-icon" id="btn-font-inc" aria-label="增大字号">A＋</button>
+    <div class="tb-divider tb-hide-sm" aria-hidden="true"></div>
+    <div class="theme-seg" role="group" aria-label="阅读主题切换">
+      <button type="button" data-set-theme="light" aria-pressed="true">浅色</button>
+      <button type="button" data-set-theme="sepia" aria-pressed="false">护眼</button>
+      <button type="button" data-set-theme="dark" aria-pressed="false">深色</button>
+    </div>
+    <button type="button" class="tb-btn" id="btn-progress-open" aria-label="查看学习进度与同步">进度</button>
+    <button type="button" class="tb-btn tb-btn-accent" id="btn-agent-toggle" aria-label="展开或收起右侧伴学栏">伴学</button>
+  </div>
+</header>
+
+<div class="shell" id="cw-shell">
+  <aside class="sidebar" id="cw-sidebar" aria-label="图书目录与大纲"></aside>
+  <main class="stage" id="cw-stage">
+    <div class="book-frame" id="cw-book-frame">
+      <button type="button" class="page-edge-btn edge-prev" id="edge-prev" aria-label="翻到上一页" title="上一页 (←)">‹</button>
+      <div class="book-viewport" id="cw-viewport">
+        <article class="book-paper" id="cw-page"></article>
+      </div>
+      <button type="button" class="page-edge-btn edge-next" id="edge-next" aria-label="翻到下一页" title="下一页 (→)">›</button>
+    </div>
+    <footer class="reader-statusbar" id="cw-statusbar" aria-label="阅读位置与同步状态栏">
+      <span class="status-loc" id="status-loc"></span>
+      <span class="status-right">
+        <span class="status-sync" id="status-sync"></span>
+        <span class="status-page" id="status-page"></span>
+      </span>
+    </footer>
+  </main>
+
+  <aside class="agent-pane" id="cw-agent-pane" aria-label="右侧伴学对话栏" aria-hidden="true">
+    <div class="agent-head">
+      <div class="agent-head-title">
+        <strong>伴学</strong>
+        <span class="agent-mode-badge" id="agent-mode-badge">连接中</span>
+      </div>
+      <div class="agent-head-actions">
+        <button type="button" class="tb-btn" id="btn-agent-clear" title="清空当前对话">清空</button>
+        <button type="button" class="tb-btn" id="btn-agent-close" aria-label="收起伴学栏">×</button>
+      </div>
+    </div>
+
+    <div class="agent-context-bar" id="cw-agent-ctx" hidden>
+      <span id="agent-ctx-text"></span>
+      <button type="button" class="agent-ctx-x" id="btn-ctx-clear" aria-label="清除上下文">×</button>
+    </div>
+
+    <div class="agent-messages" id="cw-agent-msgs" role="log" aria-live="polite"></div>
+
+    <div class="agent-composer">
+      <textarea id="agent-input" rows="2" placeholder="点文中专有名词、划选不懂的句子，或直接提问…" aria-label="向伴学提问"></textarea>
+      <div class="agent-composer-bar">
+        <button type="button" class="tb-btn tb-btn-accent" id="btn-agent-send">发送</button>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<div class="drawer-scrim" id="cw-scrim" aria-hidden="true"></div>
+
+<aside class="ai-drawer" id="cw-progress-drawer" aria-label="学习进度与掌握情况" aria-hidden="true">
+  <div class="ai-drawer-head">
+    <h2>学习大纲与掌握情况</h2>
+    <button type="button" class="tb-btn" id="btn-progress-close" aria-label="关闭学习进度抽屉">关闭</button>
+  </div>
+  <div class="ai-drawer-body" id="cw-progress-body"></div>
+</aside>
+
+<div class="term-pop" id="cw-term-tip" role="dialog" aria-label="专有名词解释"></div>
+<button type="button" class="sel-pill" id="cw-sel-pill" hidden>✦ 追问</button>
+<div class="toast" id="cw-toast" role="status" aria-live="polite"></div>
+
+<script id="course-data" type="application/json">
+{{INLINE_DATA}}
+</script>
+<script>
+{{INLINE_JS}}
+</script>
+</body>
+</html>

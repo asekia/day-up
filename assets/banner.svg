@@ -1,0 +1,166 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 220" width="880" height="220" role="img" aria-label="day-up">
+  <defs>
+    <filter id="floatShadow" x="-10%" y="-10%" width="124%" height="128%">
+      <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#1E2126" flood-opacity="0.07"/>
+    </filter>
+  </defs>
+
+  <!-- Warm ivory bookplate frame -->
+  <rect x="4" y="4" width="872" height="212" rx="12" fill="#FAF7F0" stroke="#DDD5C5" stroke-width="1.5"/>
+  <rect x="12" y="12" width="856" height="196" rx="8" fill="none" stroke="#EAE3D5" stroke-width="1"/>
+  <path d="M22 30 V22 H30 M850 22 H858 V30 M22 190 V198 H30 M850 198 H858 V190" fill="none" stroke="#C7BDA8" stroke-width="1.2"/>
+
+  <!-- Warm cone of lamplight washing across the open book -->
+  <polygon points="262,56 292,46 606,174 238,174" fill="#F3E2BA" opacity="0.42"/>
+
+  <!-- Continuous desk surface horizon & subtle grain -->
+  <line x1="52" y1="174" x2="828" y2="174" stroke="#D5CCBC" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="96" y1="183" x2="210" y2="183" stroke="#E7E0D2" stroke-width="1.2" stroke-linecap="round"/>
+  <line x1="648" y1="183" x2="778" y2="183" stroke="#E7E0D2" stroke-width="1.2" stroke-linecap="round"/>
+
+  <!-- LEFT WING: Personal bookshelf row + Arched brass study lamp -->
+  <g stroke="#26231F" stroke-linecap="round" stroke-linejoin="round">
+    <!-- L-shaped iron bookend -->
+    <path d="M68 174 H82 V128 H78 V170 H68 Z" fill="#3A3D44" stroke-width="1.4"/>
+
+    <!-- Standing books (5 varied volumes) -->
+    <!-- Vol 1: Tall linen -->
+    <rect x="82" y="76" width="17" height="98" rx="1.8" fill="#E8E0CF" stroke-width="1.5"/>
+    <rect x="82" y="90" width="17" height="7" fill="#B85032" stroke-width="1.2"/>
+    <line x1="86" y1="156" x2="95" y2="156" stroke-width="1.1"/>
+
+    <!-- Vol 2: Deep charcoal -->
+    <rect x="99" y="66" width="20" height="108" rx="1.8" fill="#2E3239" stroke-width="1.5"/>
+    <rect x="103" y="80" width="12" height="18" rx="1" fill="#FAF7F0" stroke-width="1"/>
+    <line x1="103" y1="154" x2="115" y2="154" stroke="#D8CFC0" stroke-width="1.2"/>
+
+    <!-- Vol 3: Muted sage -->
+    <rect x="119" y="84" width="16" height="90" rx="1.8" fill="#636E64" stroke-width="1.5"/>
+    <line x1="122" y1="98" x2="132" y2="98" stroke="#FAF7F0" stroke-width="1.2"/>
+    <line x1="122" y1="103" x2="132" y2="103" stroke="#FAF7F0" stroke-width="1.2"/>
+
+    <!-- Vol 4: Warm sand -->
+    <rect x="135" y="72" width="18" height="102" rx="1.8" fill="#DBC6A2" stroke-width="1.5"/>
+    <circle cx="144" cy="92" r="3" fill="#FAF7F0" stroke-width="1.1"/>
+    <line x1="139" y1="158" x2="149" y2="158" stroke-width="1.1"/>
+
+    <!-- Vol 5: Gently leaning volume -->
+    <g transform="rotate(-9 164 174)">
+      <rect x="155" y="86" width="16" height="88" rx="1.8" fill="#EFE8D8" stroke-width="1.5"/>
+      <rect x="155" y="98" width="16" height="5" fill="#4A463F" stroke-width="1.1"/>
+    </g>
+
+    <!-- Study desk lamp -->
+    <path d="M204 168 C196 118, 206 62, 246 46" fill="none" stroke-width="3"/>
+    <path d="M204 168 C196 118, 206 62, 246 46" fill="none" stroke="#C9A66B" stroke-width="1.2"/>
+    <circle cx="247" cy="46" r="3.4" fill="#D8B87E" stroke-width="1.5"/>
+    <!-- Warm bulb -->
+    <circle cx="268" cy="57" r="4.8" fill="#FFFDF6" stroke-width="1.4"/>
+    <!-- Terracotta shade -->
+    <path d="M238 56 C242 40, 266 35, 286 46 L290 54 C270 61, 250 62, 238 56 Z" fill="#B85032" stroke-width="1.8"/>
+    <!-- Stepped dome base -->
+    <path d="M188 174 Q204 160 220 174 Z" fill="#D6CCB9" stroke-width="1.6"/>
+    <rect x="184" y="171" width="40" height="3" rx="1.2" fill="#4A463F" stroke-width="1.3"/>
+  </g>
+
+  <!-- CENTERPIECE: Open Litera hardcover textbook + Floating diagram card -->
+  <g transform="translate(0, 2)">
+    <!-- Soft book shadow -->
+    <ellipse cx="440" cy="176" rx="148" ry="8" fill="#E7DFD0"/>
+
+    <!-- Hardcover cloth binding -->
+    <rect x="308" y="64" width="264" height="110" rx="5" fill="#252930" stroke="#1E2126" stroke-width="1.6"/>
+
+    <!-- Page stack thickness -->
+    <rect x="313" y="59" width="254" height="109" rx="3" fill="#EFE9DC" stroke="#CFC6B5" stroke-width="1.2"/>
+
+    <!-- Left page -->
+    <path d="M317 56 H440 V164 H317 Q315 164 315 162 V58 Q315 56 317 56 Z" fill="#FFFDF9" stroke="#CEC5B3" stroke-width="1.3"/>
+    <!-- Chapter rule + short paragraph strokes (no text) -->
+    <rect x="330" y="69" width="14" height="4" rx="1.5" fill="#B85032"/>
+    <line x1="350" y1="71" x2="412" y2="71" stroke="#6E675C" stroke-width="1.8" stroke-linecap="round"/>
+    <line x1="330" y1="83" x2="424" y2="83" stroke="#B6AEA0" stroke-width="1.4" stroke-linecap="round"/>
+    <line x1="330" y1="91" x2="424" y2="91" stroke="#B6AEA0" stroke-width="1.4" stroke-linecap="round"/>
+    <line x1="330" y1="99" x2="398" y2="99" stroke="#B6AEA0" stroke-width="1.4" stroke-linecap="round"/>
+
+    <!-- Framed S-curve plot on left page -->
+    <rect x="330" y="109" width="94" height="44" rx="2.5" fill="#FAF6EE" stroke="#DBD2C1" stroke-width="1.1"/>
+    <line x1="339" y1="145" x2="415" y2="145" stroke="#C5BCAE" stroke-width="1"/>
+    <line x1="339" y1="116" x2="339" y2="145" stroke="#C5BCAE" stroke-width="1"/>
+    <line x1="339" y1="130.5" x2="415" y2="130.5" stroke="#DFD7C8" stroke-width="0.9" stroke-dasharray="2.5 2.5"/>
+    <path d="M342 142 C364 142, 374 119, 412 119" fill="none" stroke="#B85032" stroke-width="2" stroke-linecap="round"/>
+    <circle cx="377" cy="130.5" r="3" fill="#FAF6EE" stroke="#1E2126" stroke-width="1.5"/>
+
+    <!-- Right page -->
+    <path d="M440 56 H563 Q565 56 565 58 V162 Q565 164 563 164 H440 Z" fill="#FFFEFB" stroke="#CEC5B3" stroke-width="1.3"/>
+    <!-- 3-step progressive causal diagram (wordless) -->
+    <rect x="455" y="68" width="24" height="15" rx="2.2" fill="#FAF6EE" stroke="#4A463F" stroke-width="1.2"/>
+    <line x1="479" y1="75.5" x2="491" y2="75.5" stroke="#B85032" stroke-width="1.3"/>
+    <polygon points="489,72.8 494,75.5 489,78.2" fill="#B85032"/>
+    <rect x="494" y="68" width="24" height="15" rx="2.2" fill="#FAF6EE" stroke="#4A463F" stroke-width="1.2"/>
+    <line x1="518" y1="75.5" x2="530" y2="75.5" stroke="#B85032" stroke-width="1.3"/>
+    <polygon points="528,72.8 533,75.5 528,78.2" fill="#B85032"/>
+    <rect x="533" y="68" width="20" height="15" rx="2.2" fill="#F5E3DC" stroke="#B85032" stroke-width="1.3"/>
+
+    <!-- Highlighted line + short prose strokes -->
+    <rect x="455" y="92" width="72" height="9" rx="2" fill="#F6E3DC"/>
+    <line x1="459" y1="96.5" x2="522" y2="96.5" stroke="#B85032" stroke-width="1.4" stroke-linecap="round"/>
+    <line x1="455" y1="109" x2="550" y2="109" stroke="#B6AEA0" stroke-width="1.4" stroke-linecap="round"/>
+    <line x1="455" y1="117" x2="538" y2="117" stroke="#B6AEA0" stroke-width="1.4" stroke-linecap="round"/>
+
+    <!-- Worked artifact block on right page -->
+    <rect x="455" y="127" width="95" height="26" rx="2.5" fill="#F3EEE3" stroke="#DBD2C1" stroke-width="1.1"/>
+    <line x1="463" y1="136" x2="516" y2="136" stroke="#5A554C" stroke-width="1.4" stroke-linecap="round"/>
+    <line x1="463" y1="144" x2="536" y2="144" stroke="#8C8478" stroke-width="1.3" stroke-linecap="round"/>
+
+    <!-- Spine crease & terracotta swallowtail ribbon -->
+    <line x1="440" y1="56" x2="440" y2="164" stroke="#C8BFAE" stroke-width="1.4"/>
+    <path d="M436.5 164 V191 L440.5 185.5 L444.5 191 V164 Z" fill="#B85032" stroke="#26231F" stroke-width="1.2" stroke-linejoin="round"/>
+
+    <!-- Floating geometric index card (tilted slightly, zero words) -->
+    <g transform="rotate(-3 576 74)" filter="url(#floatShadow)">
+      <rect x="542" y="46" width="68" height="48" rx="5" fill="#FFFFFF" stroke="#CFC6B4" stroke-width="1.3"/>
+      <circle cx="564" cy="70" r="11" fill="#FAF6EE" stroke="#4A463F" stroke-width="1.2"/>
+      <path d="M564 70 L572 63" stroke="#B85032" stroke-width="1.6" stroke-linecap="round"/>
+      <circle cx="564" cy="70" r="2" fill="#B85032"/>
+      <line x1="582" y1="62" x2="601" y2="62" stroke="#6E675C" stroke-width="1.4" stroke-linecap="round"/>
+      <line x1="582" y1="70" x2="598" y2="70" stroke="#B6AEA0" stroke-width="1.3" stroke-linecap="round"/>
+      <line x1="582" y1="78" x2="594" y2="78" stroke="#B85032" stroke-width="1.3" stroke-linecap="round"/>
+    </g>
+  </g>
+
+  <!-- RIGHT WING: Stacked notebooks, fountain pen, and steaming ceramic mug -->
+  <g stroke="#26231F" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Bottom notebook -->
+    <rect x="630" y="159" width="88" height="15" rx="2" fill="#5D675E" stroke-width="1.5"/>
+    <rect x="634" y="162" width="81" height="9" rx="1" fill="#FBF8F1" stroke-width="1"/>
+    <line x1="638" y1="166.5" x2="711" y2="166.5" stroke="#CFC6B5" stroke-width="0.9"/>
+    <!-- Terracotta index tab sticking out -->
+    <rect x="714" y="163" width="8" height="4.5" rx="1" fill="#B85032" stroke-width="1"/>
+
+    <!-- Top notebook -->
+    <rect x="638" y="146" width="74" height="13" rx="2" fill="#E6DDD0" stroke-width="1.5"/>
+    <rect x="638" y="146" width="10" height="13" rx="1.5" fill="#2E3239" stroke-width="1.4"/>
+
+    <!-- Fountain pen resting diagonally across top notebook -->
+    <g transform="rotate(-11 676 142)">
+      <rect x="646" y="139" width="56" height="5.2" rx="2.4" fill="#32363E" stroke-width="1.4"/>
+      <line x1="682" y1="139" x2="682" y2="144.2" stroke="#D8B87E" stroke-width="1.3"/>
+      <path d="M646 139.5 L637 141.6 L646 143.7 Z" fill="#D8B87E" stroke-width="1.2"/>
+      <line x1="637" y1="141.6" x2="642" y2="141.6" stroke-width="1"/>
+    </g>
+
+    <!-- Warm ceramic mug + coaster + gentle steam wisps -->
+    <rect x="742" y="171" width="46" height="3" rx="1.2" fill="#C9A66B" stroke-width="1.2"/>
+    <path d="M747 136 H783 V164 Q783 171 776 171 H754 Q747 171 747 164 Z" fill="#F3ECE0" stroke-width="1.6"/>
+    <rect x="747" y="142" width="36" height="5" fill="#B85032" stroke="none"/>
+    <line x1="747" y1="142" x2="783" y2="142" stroke-width="1.2"/>
+    <line x1="747" y1="147" x2="783" y2="147" stroke-width="1.2"/>
+    <!-- Mug handle -->
+    <path d="M783 143 H789 Q795 143 795 151.5 Q795 160 789 160 H783" fill="none" stroke-width="1.8"/>
+
+    <!-- Delicate steam wisps -->
+    <path d="M759 128 C756 121, 763 116, 759 109" fill="none" stroke="#C5BBAE" stroke-width="1.4"/>
+    <path d="M771 126 C768 119, 775 114, 771 107" fill="none" stroke="#C5BBAE" stroke-width="1.4"/>
+  </g>
+</svg>
