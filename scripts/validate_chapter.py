@@ -29,6 +29,12 @@ FORBIDDEN_CLICHES = [
     "显而易见",
     "毋庸置疑",
     "众所周知",
+    "in conclusion,",
+    "needless to say,",
+    "it is worth noting that",
+    "it goes without saying",
+    "as we all know,",
+    "undoubtedly,",
 ]
 
 IGNORED_ACRONYMS = {
@@ -178,6 +184,52 @@ def block_prose_text(b):
     return "\n".join(parts)
 
 
+EN_OBJECTIVE_VERBS = {
+    "understand", "master", "learn", "explain", "apply", "build",
+    "implement", "diagnose", "analyze", "derive", "compare", "evaluate",
+    "design", "compute", "calculate", "identify", "solve", "distinguish",
+    "trace", "debug", "interpret", "formulate", "verify", "use",
+}
+
+
+def isEnglishProse(text):
+    """Detect whether a chapter is predominantly written in English."""
+    cjk = len(re.findall(r"[\u4e00-\u9fff]", text))
+    latin = len(re.findall(r"[A-Za-z]", text))
+    return latin > 60 and cjk < latin * 0.15
+
+
+def isValidObjective(text):
+    """Accept Chinese ('了解'/'掌握') or English action-verb chapter objectives."""
+    s = text.strip() if isinstance(text, str) else ""
+    if s.startswith(("了解", "掌握")):
+        return True
+    first = re.split(r"[\s:：,，-]", s.lower(), maxsplit=1)[0]
+    return first in EN_OBJECTIVE_VERBS
+
+
+def hasRoadmapFlow(text):
+    """Accept Chinese ('先…再…最后…') or English ('first…then/next…finally…') roadmaps."""
+    if not isinstance(text, str):
+        return False
+    if "先" in text and "再" in text and "最后" in text:
+        return True
+    low = text.lower()
+    hasMid = "then" in low or "next" in low
+    hasEnd = "finally" in low or "lastly" in low
+    return "first" in low and hasMid and hasEnd
+
+
+def hasCodeLead(prevBlk):
+    """Check whether the block before code introduces it in Chinese or English."""
+    if prevBlk is None or prevBlk.get("type") not in ("p", "note", "ex", "side_figure"):
+        return False
+    txt = str(prevBlk.get("text") or "")
+    low = txt.lower()
+    cues = ("代码如下", "如下：", "as follows", "below:", "code:", "implementation:")
+    return any(c in txt or c in low for c in cues)
+
+
 def has_local_acronym_explanation(acr, text):
     """判断该缩写是否在给定局部文本中当场展开了全称或通过 {{term:...}} 给出释义。"""
     if not text:
@@ -187,10 +239,10 @@ def has_local_acronym_explanation(acr, text):
         rf"{esc}\**\s*[（(][^）)]{{2,}}[）)]",
         rf"[（(][^）)]*{esc}[^）)]*[）)]",
         rf"\{{\{{term:[^|}}]*{esc}[^|}}]*\|[^}}]+\}}\}}",
-        rf"{esc}\**\s*(?:全称|是指|指的是|即|就是|代表|叫做|称为|为)",
-        rf"(?:简称|叫做|称为|记作|缩写为|即)\s*\**{esc}\b",
+        rf"{esc}\**\s*(?:全称|是指|指的是|即|就是|代表|叫做|称为|为|stands for|means|refers to|is short for)",
+        rf"(?:简称|叫做|称为|记作|缩写为|即|short for|abbreviated as|known as|called)\s*\**{esc}\b",
     ]
-    return any(re.search(pat, text) for pat in patterns)
+    return any(re.search(pat, text, flags=re.IGNORECASE) for pat in patterns)
 
 
 def strip_inline_code(text):
@@ -220,12 +272,12 @@ def validate_chapter(ch, source_name="<input>"):
         errors.append(f"[{label}] objectives 应为 3~5 条，当前为 {len(objs) if isinstance(objs, list) else '非数组'}")
     else:
         for i, o in enumerate(objs, start=1):
-            if not isinstance(o, str) or not (o.strip().startswith("了解") or o.strip().startswith("掌握")):
-                errors.append(f"[{label}] objectives 第 {i} 条未以'了解'或'掌握'开头：{o!r}")
+            if not isValidObjective(o):
+                errors.append(f"[{label}] objectives 第 {i} 条未以'了解'/'掌握'或英文行动动词开头：{o!r}")
 
     roadmap = ch.get("roadmap", "")
-    if not (isinstance(roadmap, str) and "先" in roadmap and "再" in roadmap and "最后" in roadmap):
-        errors.append(f"[{label}] roadmap 应包含'先……再……最后……'结构")
+    if not hasRoadmapFlow(roadmap):
+        errors.append(f"[{label}] roadmap 应包含'先……再……最后……'或英文 'First ... then/next ... finally ...' 结构")
 
     sections = iter_chapter_blocks(ch)
     if not sections:
@@ -279,13 +331,8 @@ def validate_chapter(ch, source_name="<input>"):
                 if fid:
                     defined_figs.add(fid)
                 if b.get("lang") != "syntax":
-                    has_lead = (
-                        prev_blk is not None
-                        and prev_blk.get("type") in ("p", "note", "ex", "side_figure")
-                        and ("代码如下" in prev_blk.get("text", "") or "如下：" in prev_blk.get("text", ""))
-                    )
-                    if not has_lead and not b.get("result"):
-                        warnings.append(f"[{label}] §{sec_num} 的 code 块前建议写'代码如下：'或附 result 图说明")
+                    if not hasCodeLead(prev_blk) and not b.get("result"):
+                        warnings.append(f"[{label}] §{sec_num} 的 code 块前建议写'代码如下：'/'below:'或附 result 图说明")
             elif btype == "table" and b.get("id"):
                 defined_tabs.add(b["id"])
             elif btype == "eq" and b.get("id"):
@@ -304,9 +351,11 @@ def validate_chapter(ch, source_name="<input>"):
 
     all_texts = extract_prose_texts(ch)
     joined_prose = "\n".join(all_texts)
+    joined_lower = joined_prose.lower()
+    is_en = isEnglishProse(joined_prose)
 
     for cliche in FORBIDDEN_CLICHES:
-        if cliche in joined_prose:
+        if cliche.lower() in joined_lower:
             errors.append(f"[{label}] 正文出现禁用 AI 套话：'{cliche}'")
 
     used_figs = set(re.findall(r"\{\{fig:([^}]+)\}\}", joined_prose))
@@ -478,29 +527,45 @@ def validate_chapter(ch, source_name="<input>"):
             f"[{label}] 检测到 AI 名词化/公文僵尸句：{', '.join(zombie_hits[:4])}，请改用「具体主语 + 动作 + 肉眼可见结果」的人话短句重写"
         )
 
-    abrupt_openings = ("接下来我们介绍", "下面我们介绍", "下面介绍", "本节讨论", "本节将介绍", "本节主要介绍", "在这一节中，我们")
+    abrupt_openings = (
+        "接下来我们介绍", "下面我们介绍", "下面介绍", "本节讨论", "本节将介绍", "本节主要介绍", "在这一节中，我们",
+        "in this section, we", "next, we introduce", "next we introduce", "below we introduce", "this section introduces",
+    )
     for s_idx, (sec_num, _, blks) in enumerate(sections):
         if s_idx == 0:
             continue
         first_p = next((b.get("text", "") for b in blks if b.get("type") == "p" and isinstance(b.get("text"), str)), "")
+        first_low = first_p.lstrip().lower()
         for ab in abrupt_openings:
-            if first_p.lstrip().startswith(ab):
+            if first_low.startswith(ab):
                 warnings.append(
                     f"[{label}] §{sec_num} 开头使用生硬切题语 '{ab}'，缺少与上一节的因果咬合，请直接承接上一节末尾留下的具体问题或新边界"
                 )
                 break
 
-    example_cues = ("例如", "比如", "举例", "案例", "实测", "演示", "例 ")
-    contrast_cues = ("区别", "对比", "不同于", "并非", "而不是", "限制", "代价", "失效", "缺点", "省略", "少用", "但是", "但 ")
-    if not any(c in joined_prose for c in example_cues):
-        warnings.append(f"[{label}] 全章未见具体举例引导词（如'例如/比如/举例'），请确认是否用真实具体例子讲清概念")
-    if not any(c in joined_prose for c in contrast_cues):
+    example_cues = (
+        "例如", "比如", "举例", "案例", "实测", "演示", "例 ",
+        "for example", "for instance", "e.g.", "suppose", "concrete example", "worked example", "case study",
+    )
+    contrast_cues = (
+        "区别", "对比", "不同于", "并非", "而不是", "限制", "代价", "失效", "缺点", "省略", "少用", "但是", "但 ",
+        "unlike", "whereas", "in contrast", "trade-off", "tradeoff", "pitfall", "limitation", "however", "fails when", "instead of",
+    )
+    if not any(c in joined_lower for c in example_cues):
+        warnings.append(f"[{label}] 全章未见具体举例引导词（如'例如/比如'/'for example'），请确认是否用真实具体例子讲清概念")
+    if not any(c in joined_lower for c in contrast_cues):
         warnings.append(f"[{label}] 全章缺少横向对比、工程取舍或失效边界讨论，注意避免解释面过于狭窄")
 
     real_code_count = 0
     worked_artifact_count = 0
-    tech_cues = ("代码", "API", "JSON", "HTTP", "SQL", "Python", "函数", "算法", "向量", "协议", "框架", "Agent")
-    is_tech_chapter = sum(1 for c in tech_cues if c in joined_prose) >= 2
+    tech_cues = (
+        "代码", "api", "json", "http", "sql", "python", "函数", "算法", "向量", "协议", "框架", "agent",
+        "code", "function", "algorithm", "vector", "protocol", "framework", "pytorch", "tensor",
+    )
+    is_tech_chapter = sum(1 for c in tech_cues if c in joined_lower) >= 2
+    max_para_len = 1100 if is_en else 280
+    sub_threshold = 2600 if is_en else 750
+    min_follow_len = 220 if is_en else 160
 
     for sec_num, subs, blks in sections:
         sec_text_len = 0
@@ -525,11 +590,11 @@ def validate_chapter(ch, source_name="<input>"):
                 raw_p = b["text"]
                 plen = visible_text_len(raw_p)
                 sec_text_len += plen
-                if plen > 280:
-                    warnings.append(f"[{label}] §{sec_num} 存在 {plen} 字的超长段落（建议 90~220 字、不超过 280 字），请拆分为短段以保证纸书呼吸感")
-                em_cnt = raw_p.count("——")
+                if plen > max_para_len:
+                    warnings.append(f"[{label}] §{sec_num} 存在 {plen} 字的超长段落（上限 {max_para_len}），请拆分为短段以保证纸书呼吸感")
+                em_cnt = raw_p.count("——") + raw_p.replace("——", "").count("—")
                 if em_cnt >= 2:
-                    warnings.append(f"[{label}] §{sec_num} 单段出现 {em_cnt} 个破折号 '——'，读起来费力，请拆成干净短句（每段最多 1 个破折号）")
+                    warnings.append(f"[{label}] §{sec_num} 单段出现 {em_cnt} 个破折号，读起来费力，请拆成干净短句（每段最多 1 个破折号）")
                 vis_p = re.sub(r"\{\{term:([^|}]+)\|[^}]+\}\}", r"\1", raw_p)
                 long_paren = re.search(r"（[^（）]{36,}）", vis_p)
                 if long_paren:
@@ -545,7 +610,7 @@ def validate_chapter(ch, source_name="<input>"):
                         f"[{label}] §{sec_num} 的 side_figure SVG viewBox 宽度为 {vb.group(1)}（>280），放进窄侧栏会缩成蚂蚁字，请改用全宽 figure 或 animated-diagram"
                     )
             elif bt == "eq":
-                # 检查公式后面是否紧跟深入拆解（至少 160 字讲解或带 □ 逐符号拆解列表）
+                # 检查公式后面是否紧跟深入拆解（至少 min_follow_len 字符讲解或带 □ 逐符号拆解列表）
                 follow_len = 0
                 has_enum_unpack = False
                 for nb in blks[idx + 1 : idx + 4]:
@@ -560,18 +625,18 @@ def validate_chapter(ch, source_name="<input>"):
                             follow_len += len(it if isinstance(it, str) else it.get("text", ""))
                     elif nbt in ("note", "ex", "prop", "def"):
                         follow_len += len(nb.get("text", ""))
-                if not has_enum_unpack and follow_len < 160:
+                if not has_enum_unpack and follow_len < min_follow_len:
                     warnings.append(
-                        f"[{label}] §{sec_num} 的公式 '{b.get('id', 'eq')}' 后续讲解偏短（{follow_len} 字且无逐符号 □ 拆解），请按四步深讲法拆清每个符号含义与具体数值推导"
+                        f"[{label}] §{sec_num} 的公式 '{b.get('id', 'eq')}' 后续讲解偏短（{follow_len} 字符且无逐符号 □ 拆解），请按四步深讲法拆清每个符号含义与具体数值推导"
                     )
             elif bt in ("enum", "def", "prop", "note", "ex"):
                 sec_text_len += len(b.get("text", ""))
                 for it in b.get("items", []):
                     sec_text_len += len(it if isinstance(it, str) else it.get("text", ""))
-        if sec_text_len > 750 and len(subs) == 0:
-            warnings.append(f"[{label}] §{sec_num} 达 {sec_text_len} 字却无 h4 子节分层，建议拆出 1. / 2. 子节改善阅读层次")
+        if sec_text_len > sub_threshold and len(subs) == 0:
+            warnings.append(f"[{label}] §{sec_num} 达 {sec_text_len} 字符却无 h4 子节分层，建议拆出 1. / 2. 子节改善阅读层次")
         if sec_text_len < 120 and not has_rich:
-            warnings.append(f"[{label}] §{sec_num} 正文过短（仅 {sec_text_len} 字且无图表/代码），请检查是否解释面过于狭窄")
+            warnings.append(f"[{label}] §{sec_num} 正文过短（仅 {sec_text_len} 字符且无图表/代码），请检查是否解释面过于狭窄")
 
     if is_tech_chapter and real_code_count < 2:
         warnings.append(
@@ -582,8 +647,11 @@ def validate_chapter(ch, source_name="<input>"):
             f"[{label}] 非代码学科章节仅有 {worked_artifact_count} 处一手硬实操载体（建议每章至少 2 处：如完整手推例题 ex、真实数据/账表 table、临床病例/判例涵摄、核心公式推导或互动演练），切忌纯文字空谈"
         )
 
-    counterfactual_cues = ("如果", "假如", "删掉", "去掉", "漏掉", "改掉", "否则", "一旦", "前提", "失效", "反例", "误诊", "逆转")
-    if not any(c in joined_prose for c in counterfactual_cues):
+    counterfactual_cues = (
+        "如果", "假如", "删掉", "去掉", "漏掉", "改掉", "否则", "一旦", "前提", "失效", "反例", "误诊", "逆转",
+        "if we", "what if", "remove", "delete", "omit", "otherwise", "breaks when", "counterexample", "misdiagnos", "revers",
+    )
+    if not any(c in joined_lower for c in counterfactual_cues):
         warnings.append(
             f"[{label}] 全章缺少“如果改掉/删掉/漏掉某一步会怎样”的反事实边界检验，建议补齐以贴近 Z-Lib 经典教材深度"
         )
@@ -614,20 +682,22 @@ SKIPPED_DERIV_PATTERNS = (
     r"(?:移项|取对数|整理|化简)[^，。；\n]{0,12}(?:即可|易得|可得|反解出)",
     r"(?:易得|显然可得|同理可得|同理可证|不难推出|容易验证|无需赘述|顾名思义)",
     r"(?:由此|从而|进而)(?:必然导致|必然引发|自然会引发)",
+    r"\b(?:easily seen|easy to see|straightforward to show|trivial to verify|obviously follows|by simple rearrangement|self-evident)\b",
+    r"\b(?:inevitably leads to|naturally causes|automatically results in)\b",
 )
 
 CODE_SYNTAX_WATCH = (
-    ("finally", ("finally", "无论是否报错", "异常", "必定执行", "一定会执行")),
-    ("no_grad", ("no_grad", "不算梯度", "关闭梯度", "反向传播", "省显存")),
-    ("gather", ("gather", "按索引", "挑出", "取出对应", "下标取值")),
-    ("clamp", ("clamp", "截断", "兜底", "越界", "负数")),
-    ("[:, :-1", (":-1", "右移一位", "错开一位", "预测下一个", "对齐")),
+    ("finally", ("finally", "无论是否报错", "异常", "必定执行", "一定会执行", "always runs", "exception", "cleanup")),
+    ("no_grad", ("no_grad", "不算梯度", "关闭梯度", "反向传播", "省显存", "gradient", "backprop", "memory")),
+    ("gather", ("gather", "按索引", "挑出", "取出对应", "下标取值", "index", "select", "pick")),
+    ("clamp", ("clamp", "截断", "兜底", "越界", "负数", "clip", "bound", "range")),
+    ("[:, :-1", (":-1", "右移一位", "错开一位", "预测下一个", "对齐", "shift", "next token", "align")),
 )
 
 
 def checkSkippedDerivations(joinedProse, label):
     """全学科跳步推导检查：拦截公式与因果论证中的跨步偷懒措辞。"""
-    hits = [m.group(0) for pat in SKIPPED_DERIV_PATTERNS for m in [re.search(pat, joinedProse)] if m]
+    hits = [m.group(0) for pat in SKIPPED_DERIV_PATTERNS for m in [re.search(pat, joinedProse, re.IGNORECASE)] if m]
     if not hits:
         return []
     return [f"[{label}] 检测到全学科跳步/防御性省略措辞（{', '.join(hits[:3])}），请补全中间因果或代数推导步骤与具体实例验收"]
@@ -653,7 +723,7 @@ def checkUnexplainedCodeTokens(sections, label):
             if b.get("type") != "code":
                 continue
             codeStr = str(b.get("code") or b.get("text") or "")
-            nearby = "\n".join(block_prose_text(x) for x in blks[max(0, idx - 1) : idx + 3])
+            nearby = "\n".join(block_prose_text(x) for x in blks[max(0, idx - 1) : idx + 3]).lower()
             for token, cues in CODE_SYNTAX_WATCH:
                 if token in codeStr and sum(1 for c in cues if c in nearby) < 2:
                     warns.append(f"[{label}] §{secNum} 代码使用了 '{token}'，但前后正文未讲清它是什么语法/为什么必须写/删掉会怎样（避免防御性编书）")
@@ -757,13 +827,14 @@ def scanBlockLatin(clean, window, known, secNum, label):
 
 
 def checkNakedLatinTerms(sections, label):
-    """捕捉正文里未解释就裸奔的英文小写/连字符/驼峰术语（如 on-policy、logits、sigmoid）。"""
+    """捕捉中文正文里未解释就裸奔的英文术语（纯英文教材跳过）。"""
+    sample = "\n".join(block_prose_text(b) for _, _, blks in sections for b in blks if b.get("type") != "eq")
+    if isEnglishProse(sample):
+        return []
     known, warns = set(COMMON_LATIN_ALLOW), []
     for secNum, _, blks in sections:
         prev = ""
-        for b in blks:
-            if b.get("type") == "eq":
-                continue
+        for b in [x for x in blks if x.get("type") != "eq"]:
             raw = block_prose_text(b)
             known.update(collectLatinExplained(raw))
             clean = stripProseForLatin(raw)
@@ -781,8 +852,14 @@ PRACTICAL_QUIZ_CUES = (
     "如果", "假如", "删掉", "写反", "改", "报错", "异常", "故障", "崩溃",
     "排障", "诊断", "方案", "选型", "场景", "实验", "算", "代入", "验证",
     "微调", "线上", "病例", "案情", "政策", "成本", "为什么", "为何",
+    "if ", "suppose", "remove", "delete", "swap", "error", "bug", "fail", "crash",
+    "diagnos", "debug", "trade-off", "tradeoff", "scenario", "experiment",
+    "calculate", "compute", "plug in", "verify", "production", "patient", "case", "policy", "cost", "why ",
 )
-SHALLOW_QUIZ_RE = re.compile(r"(?:以下哪项是.{1,16}的定义|什么是.{1,14}[？?]|请简述.{1,20}(?:区别|特点|概念|定义)|是指[（(])")
+SHALLOW_QUIZ_RE = re.compile(
+    r"(?:以下哪项是.{1,16}的定义|什么是.{1,14}[？?]|请简述.{1,20}(?:区别|特点|概念|定义)|是指[（(]|which of the following (?:best )?defines|what is the definition of|briefly state the definition of)",
+    re.IGNORECASE,
+)
 
 
 def extractCodeApis(codeStr):
@@ -862,7 +939,7 @@ def checkQuizDepth(ch, label):
     if not items:
         return []
     shallow = [i for i, it in enumerate(items, 1) if SHALLOW_QUIZ_RE.search(str(it.get("q", "")))]
-    practical = sum(1 for it in items if any(c in str(it.get("q", "")) for c in PRACTICAL_QUIZ_CUES))
+    practical = sum(1 for it in items if any(c in str(it.get("q", "")).lower() for c in PRACTICAL_QUIZ_CUES))
     warns = []
     if shallow:
         warns.append(f"[{label}] 习题第 {shallow} 题疑似停留在浅层概念背诵，建议改写为工程实践/现实场景诊断或定量推演题")
@@ -875,7 +952,7 @@ STALE_PATTERNS = (
     (r"openai\.ChatCompletion\.create", "已废弃旧版 OpenAI v0 接口，请改用新版 SDK / Responses API"),
     (r"\burllib2\b", "已淘汰的 Python 2 urllib2，请改用标准库 urllib.request 或 httpx"),
     (r"\bAgentExecutor\b", "旧版框架已弃用封装，请改用现代标准循环或当前主流接口"),
-    (r"(?:截至\s*202[0-3]\s*年|202[0-3]\s*年最新|目前最新[（(]202[0-3])", "内容停留在旧年份口径，请重新联网核查当下最新进展"),
+    (r"(?:截至\s*202[0-3]\s*年|202[0-3]\s*年最新|目前最新[（(]202[0-3]|\bas of 202[0-3]\b|\blatest in 202[0-3]\b)", "内容停留在旧年份口径，请重新联网核查当下最新进展"),
 )
 
 

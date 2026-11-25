@@ -3,146 +3,152 @@ name: day-up
 description: >-
   Use this skill whenever the user asks to learn a topic step-by-step, requests
   an interactive textbook or study webpage, or wants a hands-on courseware lesson
-  for any technical or conceptual subject (e.g., "教我……", "出一份交互式课件",
-  "手把手教我……", "把这份笔记做成教材网页", "用 day-up 教我……"). Profiles the
-  learner first, searches authoritative docs/blogs, creates a structured book
-  syllabus, teaches one chapter at a time with plain language and static/animated
-  diagrams, tracks live progress/doubts/quiz mistakes via progress.json, and
-  compiles clean monochrome Z-Lib LITERA-style interactive textbook HTML.
+  for any technical or conceptual subject (e.g., "teach me...", "create an
+  interactive textbook", "walk me through...", "turn these notes into a course",
+  "use day-up to teach me...", in any language). Profiles the
+  learner first, verifies up-to-date authoritative sources, creates a structured
+  8-20 chapter book syllabus, teaches one chapter at a time with progressive
+  plain-language derivations and static/animated diagrams, tracks live progress,
+  doubts, and quiz mistakes via progress.json, and compiles a zero-dependency
+  print-inspired interactive textbook HTML inside a fixed single-port library.
 ---
 
-# Day-Up：素雅纸书风交互式教材与伴学 Skill
+# Day-Up: Print-Inspired Interactive Textbook & Companion Study Skill
 
-本 Skill 将“像一本真正出版的优秀技术纸书那样**立目录、逐章学、实时掌握学习情况**”固化为标准化流程：AI 维护全书大纲与学习档案，每次只精讲当前目录章节，再由内置渲染引擎生成**素雅黑白纸书排版 × Z-Lib LITERA 双模式（连贯滚读 / 仿真翻页）**的交互式学习网页，并实时获取用户的阅读进度、标记疑问与自测错题。
+This skill standardizes teaching any subject like a classic published textbook: **design a full book syllabus, unlock one chapter at a time, and track live mastery**. The Agent maintains the syllabus and learner profile, writes only the active chapter in full depth, and compiles it via the built-in zero-dependency engine into a **calm monochrome print-inspired reader (Continuous Scroll / Paged Book modes)** with live progress, doubt markers, and closed-loop exercises.
 
-> **适用范围**：任意学科、编程语言、网络协议、系统架构、数学、经济、医学、法学或文史主题；**自动跟随用户提问语言（中文 / 英文等）编写教材与答疑**。
-
----
-
-## 一、紧跟时代与权威信源核验铁律（严禁写落后于时代的过时教材！）
-
-编写任何学科的大纲与章节前，**严禁仅凭模型训练期旧记忆闭门造车**（避免写出停留在两三年前的已废弃 API、淘汰范式、旧版法规或旧临床指南）。必须先查阅 [各行业权威报刊与高口碑博客信源库](./references/authoritative-sources.md)，主动调用 `search_web` 完成 **3 轮定向核验**：
-
-1. **第 1 轮（锚定当前年份的权威最新口径与版本）**：搜索词**必须显式带上当前年份或 `latest / release / standard / guideline / SOTA`**，核查近 12~18 个月内的最新官方标准、稳定版本号、现行修订法规、最新临床指南或主流范式变化（先看清“今天一线正在用什么”，再落笔）。
-2. **第 2 轮（旧→新演进与废弃项排查）**：专门检索该主题近两年**哪些旧接口/旧库/旧做法已经被替代或废弃**（例如旧 SDK 写法、已被取代的框架组件、已修订的条文或标准）；正文必须**以当代最新主流做法作为主线教学**，旧方案仅作为“历史演进对照”并明确标注“已过时，新项目勿用”。
-3. **第 3 轮（一线最新实战案例与踩坑复盘）**：检索近两年高口碑专家博客、工程复盘或实证案例，提炼接地气的真实输入输出、排障日志与取舍数据。
-4. **信源分级、时效标注与零编造**：
-   - 权威口径以一手文档/期刊/标准为准；关键版本、数字与最新结论必须来自本次实际检索或本地实测；
-   - `course.json` 写入真实当前 `date`，每章将实际检索核验的 3~8 条权威来源（优先包含近期文档/论文/指南）写入 `references`（格式：`机构/作者. 标题（年份）. 链接`），**严禁编造 URL**。
+> **Scope & Language**: Works across **any discipline**—computer science, AI, math, physics, economics, finance, medicine, law, history, psychology, or design. **Always write the textbook, diagrams, quizzes, and companion Q&A in the user's language (English, Chinese, etc.).**
 
 ---
 
-## 二、全书大局架构、分章伴学与进度追踪铁律（绝不一股脑全塞一起，也绝不做 4 章薄册子！）
+## 1. Freshness & Authoritative Source Verification (Never Write Outdated Material)
 
-1. **先按「四阶精通爬坡架构」立完整大纲（`course.json`），并通过大纲质检**：
-   - **严禁一次性把整门课 8~20 章正文全灌进页面，也严禁只凑 3~4 章走马观花！**
-   - 编写大纲前必须先阅读 [全书大局观与四阶精通型大纲设计规范](./references/book-architecture.md)，按 **「第一篇 奠基与最小闭环（前 1~3 章）→ 第二篇 核心机理逐层演进（中间 4~10 章，面面俱到覆盖核心脉络）→ 第三篇 深水区：评测、排障与权衡（2~4 章）→ 第四篇 端到端综合实战（最后 1~3 章）」** 规划 **8~20 章（上限最多 20 章）**；仅速览课允许 4~6 章且须标 `"scope": "quick"`；
-   - `course.json` 的 `syllabus` 每一章必须写清 `part`（篇目）、`prerequisite`（前置依赖）、`bridgeToNext`（本章末尾暴露什么瓶颈逼出下一章）、`capstoneDeliverable`（本章硬核产出）与 4~6 个递进小节，并通过 `python3 ./scripts/validateSyllabus.py <course_dir>/data/course.json` 校验（0 错误）；
-   - 未展开的章节在左侧书签目录里显示为低调的 `待学` 目录项，让读者胸有全局，同时聚焦逐章精读。
-2. **一章一章精讲、动态解锁下一章**：
-   - 首轮只生成并编译当前第 1 章（`ch1.json`）；
-   - 等用户学完当前章并完成自测后，再按同样协议追加 `ch2.json`、`ch3.json` 并重新编译同一本 `index.html`，像翻真书一样逐章解锁。
-3. **固定单一书库目录 + 固定单端口常驻书架（严禁不同会话另建目录或另开端口！）**：
-   - **唯一固定书库根目录**：**无论在哪个新会话、哪个工作区触发 `day-up`，所有教材一律固定生成在 `~/.day-up/library/<book-slug>/`**（严禁在当前项目目录乱建散落目录，也严禁每开一个新会话就换一个 `--library` 或新开 `--port`！）；每本书拥有独立子目录（内含 `index.html`、`data/`、`progress.json`、`progress_report.md`、`learner_profile.json`、`agent_chat.json`），互不串台。
-   - **唯一固定单端口常驻书架（锁定 `http://127.0.0.1:18770/`，所有会话共用同一窗口）**：
+Before drafting any syllabus or chapter, **never rely solely on stale pretraining memory** (which produces deprecated APIs, obsolete frameworks, superseded statutes, or outdated clinical guidelines). Consult [Authoritative Sources & Search Directory](./references/authoritative-sources.md) and run **3 targeted `search_web` rounds**:
+
+1. **Round 1 (Anchor to current-year authoritative standards & versions)**: Explicitly include the current year or `latest / release / standard / guideline / SOTA` to verify official docs, stable releases, current laws, clinical guidelines, or mainstream paradigms from the past 12–18 months.
+2. **Round 2 (Audit deprecations & old-to-new migrations)**: Search explicitly for APIs, libraries, methods, or standards deprecated or replaced over the past two years. **Teach today's mainstream practice as the primary narrative**; mention legacy approaches only as historical contrast clearly labeled as obsolete.
+3. **Round 3 (Recent practitioner case studies & postmortems)**: Search respected engineering/domain blogs and empirical case studies from the past two years for grounded inputs/outputs, failure logs, and trade-off numbers.
+4. **Source grading, dating & zero fabrication**:
+   - Primary standards, peer-reviewed papers, and official docs set technical accuracy; key versions, metrics, and conclusions must come from live verification or local execution;
+   - Record the real current `date` in `course.json` and include 3–8 actually verified sources in each chapter's `references` (`Org/Author. Title (Year). URL`). **Never fabricate URLs.**
+
+---
+
+## 2. Book-Level Mastery Architecture, Progressive Unlock & Fixed Single-Port Library
+
+1. **Build a 4-Stage Mastery Syllabus (`course.json`) first and pass automated syllabus validation**:
+   - **Never dump an entire 8–20 chapter book at once, and never produce a shallow 3–4 chapter pamphlet!**
+   - Read [Book Architecture & 4-Stage Mastery Syllabus](./references/book-architecture.md) first. Plan **8–20 chapters (hard ceiling: 20 chapters)** scaled comprehensively to the subject's depth across 4 progressive parts: **Part I Foundations & Minimal Loop (Ch. 1–3) → Part II Core Mechanism Evolution (Ch. 4–10, thorough coverage of key branches) → Part III Deep Water: Evaluation, Debugging & Trade-offs (2–4 ch.) → Part IV End-to-End Capstone & Mastery Transfer (final 1–3 ch.)**. Only explicit crash courses may use 4–6 chapters and must declare `"scope": "quick"`;
+   - Every entry in `course.json`'s `syllabus` must define `part`, `prerequisite`, `bridgeToNext` (exact bottleneck motivating the next chapter), `capstoneDeliverable` (concrete hands-on artifact), and 4–6 progressive sections, passing `python3 ./scripts/validateSyllabus.py <course_dir>/data/course.json` with 0 errors;
+   - Unwritten chapters appear softly as `Upcoming` in the left sidebar so the learner sees the full map while focusing deeply on the current chapter.
+2. **Unlock one chapter at a time**:
+   - Generate and compile only Chapter 1 (`ch1.json`) in the initial round;
+   - After the learner finishes the chapter and quiz, resolve doubts/mistakes first, then append `ch2.json`, `ch3.json`, ... and recompile the same `index.html`.
+3. **Fixed Single Library Directory + Fixed Single-Port Bookshelf (Never Open Separate Ports per Session!)**:
+   - **One canonical library root**: Regardless of which conversation or workspace triggers `day-up`, **always store every generated book under `~/.day-up/library/<book-slug>/`** (never scatter books into random project folders or invent per-session library directories). Each book keeps its own isolated subdirectory (`index.html`, `data/`, `progress.json`, `progress_report.md`, `learner_profile.json`, `agent_chat.json`);
+   - **One fixed persistent port (`http://127.0.0.1:18770/`, shared across all sessions in one browser window)**:
      ```bash
-     python3 ./scripts/study_server.py --agent-cmd "<当前宿主 CLI 非交互命令>"
+     python3 ./scripts/study_server.py --agent-cmd "<current host CLI non-interactive command>"
      ```
-     - **严禁 AI 擅自传入 `18771 / 18772 / 8080` 等随机新端口**；`study_server.py` 启动时会自动检查 `~/.day-up/server.json` 与 `18770` 端口——如果统一书库已在运行，直接把新书纳入同一书库并复用原窗口，绝不开第二个端口；
-     - 访问 `http://127.0.0.1:18770/` 即可在一个浏览器窗口集中管理跨会话创建的全部教材，点击任意一本进入 `/books/<slug>/` 阅读，顶栏自带 **`‹ 书架`** 一键返回；
-     - 已有建在别处的旧教材可通过 `python3 ./scripts/study_server.py --add /path/to/old_book` 直接挂载进这个固定书架（无需搬移文件）。
-   - **离线兜底与实时读写**：用户在书中勾选`□ 标记本节已掌握` / `记为有疑问` / 做自测题时，实时写入 `<book_dir>/progress.json` 与 `progress_report.md`；双击 `file://` 打开时同样支持顶栏 **`进度`** 导出。
-   - **AI 下一轮必先读档案再开讲**：每次用户说“继续下一章 / 我学完了 / 看看我学得怎么样”时，**必须先读取当前书目录下的 `progress.json`（或 `progress_report.md`）**：
-     1. 先针对性解答用户标记的 `doubt_sections`（疑问备注）与 `wrong_questions`（错题薄弱点）；
-     2. 确认无误后再生成并解锁大纲中的下一章！
+     - **Never invent random ports (`18771`, `18772`, `8080`, etc.)**. On startup, `study_server.py` checks `~/.day-up/server.json` and port `18770` (bypassing local proxies)—if the unified bookshelf is already running, it mounts any new book into the running instance and exits cleanly without opening a second port;
+     - Visiting `http://127.0.0.1:18770/` opens the unified bookshelf for every book created across sessions (search, tags, bookmarks, progress, offline HTML export), with a `‹ Library` button in every book's topbar;
+     - Existing books created elsewhere can be mounted without moving files via `python3 ./scripts/study_server.py --add /path/to/old_book`.
+   - **Live progress persistence & offline fallback**: Checking section mastery, marking doubts, or answering quizzes writes live to `<book_dir>/progress.json` and `progress_report.md` (and supports manual export when opened offline via `file://`);
+   - **Always read progress before advancing**: Whenever the user says "next chapter / I finished / review my progress", **read `<book_dir>/progress.json` (or `progress_report.md`) first**:
+     1. Address every marked `doubt_sections` note and `wrong_questions` gap;
+     2. Only after confirming understanding, author and unlock the next chapter.
 
 ---
 
-## 三、视觉与排版铁律（素雅、疏朗留白、真数学排版、零拥挤）
+## 3. Visual & Typography Standards (Calm, Breathable, Real Math, Zero Clutter)
 
-1. **绝不用花哨彩色框和嵌套重框切碎页面**：正文采用出版级黄金阅读版心（`16.5px / 1.85` 行高 + 充足段间距与页边距），左对齐粗黑体小节标题（`1.1`）、缩进 `2em` 子节标题（`1.`）、`2em` 首行缩进宋体短段。
-2. **强制子节分层与短段呼吸感**：每段控制在 **100~220 字（3~5 行）**，禁止 280 字以上的密密麻麻文字墙；超过 600 字的小节（`h3`）**必须**用 `h4`（`1. ...`、`2. ...`）清晰分层。
-3. **图文并茂且严控尺寸，静动分明**：
-   - `side_figure`（左文右图）**只用于极简小图**（`viewBox` 宽度 ≤ 260、不超过 5 个短词，如 `URI/URL/URN`），严禁把复杂流程图塞进窄侧栏导致字小如蚂蚁；
-   - 复杂流程图用全宽 `figure`；**难以理解的动态过程**（协议往返、数据流转、指针/内存移动、树分裂、梯度更新）主动用 `sim(kind:"animated-diagram")` 动态图（可播放/暂停/逐帧，单一点睛色 `var(--link)`）。每章至少 2 张真实示意图，正文用 `{{fig:ID}}` 引出。
-4. **真数学上下标排版**：公式块 `eq` 与行内 `$...$` 支持标准 LaTeX/上下标（如 `\mathbb{E}_{y\sim\pi}[r_\phi(x,y)] - \beta D_{\mathrm{KL}}(\pi \Vert \pi_{\mathrm{ref}})`、`\frac{a}{b}`），引擎零依赖自动排成规范上下标与分式，不再裸露丑陋的 ASCII 下划线。
-
----
-
-## 四、Z-Lib 经典纸书全学科讲述方式 + 每章硬实践标准（彻底去 AI 思维）
-
-编写正文前，**必须同时阅读** [Z-Lib 经典纸书全学科叙事逻辑与每章硬实践规范](./references/pedagogy-and-style.md) 与 [人话讲述方式、把情况讲透三步法与跨学科逐段改写示范](./references/human-voice-and-logic.md)，严格守住六条底线（**适用于所有学科，不只代码**）：
-- **先立「单章因果骨架」再动笔写 JSON（根治前后缺少逻辑）**：
-  - **禁止直接从头裸写 `chN.json`**！写正文前必须先锁定每一节的三要素骨架：**【承接上节什么卡点】→【本节用什么具体现场与实操讲透哪 1 件事】→【末尾露出什么新边界交给下一节】**；
-  - 任意两节如果互换顺序“居然还能读通”，说明只是平行罗列而非因果推进，必须重排；除第 1 节外，**每一节开头前两句必须明确咬住上一节末尾留下的问题**。
-- **「摆现场 → 顺时间推过程 → 最后再命名」+ 主语-动作-画面造句（根治不说人话、不会阐述情况）**：
-  - 阐述任何现象、机理或案例，严禁先甩抽象结论与定义！先用 2~3 句把**谁、在什么条件下、手里有什么、想干什么**摆在桌面上，再按时间/因果一步步推演“谁先动 → 什么变了 → 卡在哪”，等读者快猜出答案时再点破术语名与规律；
-  - **杀掉 AI 僵尸名词化句型**：每句话尽量有具体主语、动词动作与可见变化，严禁滥用 `通过…进行…从而实现…`、`旨在`、`致力于`、`本质上是…的体现`、`具有…的特性`、`赋能`、`维度`、`范式`；
-  - **严控句法呼吸**：18~35 字短句、**每段最多 1 个破折号 `——`**、严禁 36 字以上括号套娃、严禁播客卖关子开场和动不动搬运“某某团队/博客给过一个说法”充门面（出处放 `references`）、严禁在汉字段落里口播代码/算式、严禁用廉价比喻替代真实机理。
-- **全学科「每章硬实践」铁律（彻底消灭“前几章空谈理论、最后一章才给实操”）**：
-  - **编程/AI/系统/网络**：从第 1 章起每章至少 **2 段真实、完整、可落地的核心代码/报文**（10~25 行，禁用 0 代码空谈章、禁用 `fakeBrain` 写死剧本）；
-  - **数学/物理/工程**：从第 1 章起每章至少 **2 道完整手推例题 + 几何/物理图解 + 极小具体数值从头算到尾**（严禁跳步写“易得”）；
-  - **经济/金融/会计/商业**：每章至少 **2 处真实账表/财报逐行核算表（`table`）或真实政策/商业事件实证拆解**；
-  - **医学/生物/心理**：每章至少 **2 处真实临床病例鉴别诊断（主诉→指标数值→因果链→排除表）或经典实验组/对照组原始数据拆解**；
-  - **法学/历史/哲学/设计/艺术**：每章至少 **2 处完整真实判例要件涵摄（事实→争议→法条逐项比对）或一手史料/原典/改版前后作品拆解**；
-  - 每处一手实操后必配 **`□` 关键一步拆解 + “删掉/改掉这一步会怎样”的反事实边界推演**。
-- **概念预算制 + 全书概念账本（彻底根治“莫名冒出一堆概念、有的解释有的没解释”）**：
-  - **每节新概念硬上限 ≤ 3 个（最多 4 个）**：绝不顺嘴掉书袋！非本节主角的边角术语（无论中文术语、英文小写词如 `logits/sigmoid/on-policy/placebo` 还是符号 `η`），**首选直接删掉名字改说大白话动作**，次选延后到对应章节，绝不在单节里一口气甩出五六个陌生词；
-  - **严格按概念账本闭合（严禁先用后讲与中英文词裸奔）**：任何新概念、中文领域组合词（含代码 `print` 输出标签如 `左簇均值`）、英文词、缩写或非常见符号**第一次出现之前或当段**必须当场交代它是什么、在这里起什么作用，**严禁前文裸用、后文才定义**；不点任何弹窗，正文自身也必须一口气读通；
-  - **黑盒魔法数字零容忍 + 防叠字**：凡举例出现具体分数、指标、概率、金额或数组（如 `RM 打分是 {4, 2, 1}`、`弹性 -2.4`、`血压 160/100`），必须当场讲清**谁算/测出来的 + 怎么来的 + 尺度与正常边界**；使用 `{{term:词|释义}}` 时严禁前面重复该词（防 `LLMLLM` 叠字），释义须写满 **25~90 字微型微课**。
-- **彻底禁止“防御性编书”与全学科循循渐进推演铁律（不只计算机，覆盖理/工/医/经/法/文史）**：
-  - **先走通极简主干，再补护栏与例外**：严禁为了显得“严谨”在读者还没懂主线时就塞进防御性补丁（如代码的 `try/finally`、法学的但书条款、医学的罕见鉴别症、经济学的极端特例）；先把极简模型跑通，再主动发问“如果中途出意外怎么办？”顺势引出护栏；
-  - **矮台阶零跳步 + 替读者发问**：严禁跨两步因果直跳（`A → C` 必须展开成 `A → B → C`），全学科禁用 `变分求极值即可得 / 移项易得 / 显然可得 / 同理可证 / 不难推出 / 由此必然导致 / 自然会引发 / 无需赘述`；在关键转折处先演“朴素直觉为什么撞墙”，再替读者问出心里的疑问，每走 2~3 步做一句阶段回头看；
-  - **公式零跳步与代码按能力逐函数讲透**：核心公式必须先讲透概念 → `□` 逐符号拆解 → 完整写出关键中间代数步骤（严禁连续 `eq` 只夹一句过渡）+ 2~3 个极小数字手算验收；代码必须严格按 `learner_profile.json` 水平，当学习者为 `none/basic` 时，**对代码块里出现的每一个自定义函数和每一个非基础库 API/方法（含关键参数与返回形状）逐一交代用途**，绝不只挑两三行敷衍；
-- **全学科实战习题与 100% 知识闭环（绝不出超纲题与浅概念背诵题）**：禁用 AI 套话；章末单选（5~7 题）与简答（3~4 题）中**每一个考点、符号与 API 都必须在 `ref` 所指正文里白纸黑字讲透（零知识缺失）**；且所有学科都必须以**工程实践排查、现实理论分析、定量手算与反事实改错**为主（单选 ≥ 70%、简答 100%），禁止停留在背概念定义水平。
+1. **No loud colored boxes or nested borders fragmenting the page**: Use calm editorial typography (`16.5px / 1.85` line height, generous margins), bold left-aligned section headings (`1.1`), indented subsection headings (`1.`), and clean short paragraphs.
+2. **Short breathable paragraphs + `h4` hierarchy**: Keep paragraphs to **90–220 CJK chars (or ~50–110 English words, 3–5 lines)**; never write walls of text over 280 CJK chars (~160 words). Any `h3` section exceeding ~600 CJK chars (~350 words) **must** use `h4` subsections.
+3. **Purposeful static & animated visuals with strict sizing**:
+   - Use `side_figure` (text left, diagram right) **only for ultra-simple diagrams** (`viewBox` width ≤ 260, ≤ 5 short labels); never squeeze complex flowcharts into narrow sidebars;
+   - Use full-width `figure` for structured architecture/flow diagrams; proactively use `sim(kind:"animated-diagram")` (play/pause/step-frame, single accent `var(--link)`) for dynamic processes (protocol round-trips, gradient steps, state transitions, causal propagation). Include ≥ 2 real diagrams per chapter, referenced in prose via `{{fig:ID}}`.
+4. **True mathematical typesetting**: Both `eq` blocks and inline `$...$` support standard LaTeX subscripts, superscripts, and fractions (e.g., `\mathbb{E}_{y\sim\pi}[r_\phi(x,y)] - \beta D_{\mathrm{KL}}(\pi \Vert \pi_{\mathrm{ref}})`, `\frac{a}{b}`), rendered cleanly with zero external dependencies.
 
 ---
 
-## 五、标准执行流程（Workflow）
+## 4. Classic Textbook Pedagogy, Plain Human Voice & Hands-On Standards (All Disciplines)
 
-### 阶段 A：开课摸底与建书（首次收到学习请求）
-1. **极简摸底与建立学习者画像（必做）**：先阅读 [学习者摸底评估与动态调档规范](./references/learner-adaptation.md)。若用户尚未说明自身水平，先用不超过 3 个简短问题（优先用多选 `ask_question`）确认：**① 对当前主题的了解程度；② 代码/数理或对应实务基础；③ 本次学习目标**（用户已说过的维度跳过不重复问），并将结果保存为 `<course_dir>/learner_profile.json`，据此决定后续讲解深度、代码体量与跳过的前置内容。
-2. **联网查源、立四阶精通型全书大纲并做大纲质检（必做）**：
-   - 翻阅 [全书大局观规范](./references/book-architecture.md) 与 [各行业权威报刊与博客信源库](./references/authoritative-sources.md)，用 `search_web` 调研该领域经典教材的完整章节梯度与一线实战脉络；
-   - 结合 `learner_profile.json` 创建 `course.json`（按知识体量面面俱到规划 **8~20 章、上限 20 章、四阶递进**，每章带 `part`、`prerequisite`、`bridgeToNext`、`capstoneDeliverable` 与 4~6 个小节），运行大纲校验脚本确认 0 错误与无跳步断层：
-   ```bash
-   python3 ./scripts/validateSyllabus.py <course_dir>/data/course.json
-   ```
-   - 向用户展示完整大纲（含每篇目标与最终综合实战产出），确认后再进入第 1 章。
-3. **先立因果骨架，再定向检索并编写当前第 1 章 `ch1.json`**：
-   - 先按 [人话与逻辑示范库](./references/human-voice-and-logic.md) 写清本章各节的 **单章因果骨架**（每节承接什么卡点 → 讲透哪 1 件事 + 配什么一手实操 → 留什么尾巴给下一节），确认节与节之间互换顺序就讲不通（真因果而非平行罗列）；
-   - 再针对第 1 章的每个小节主动执行 `search_web`（查一手权威口径 + 查专家实战例子/坑点），对照 [纸书规范](./references/pedagogy-and-style.md)、[人话示范库](./references/human-voice-and-logic.md)、[数据协议](./references/schema-and-style.md) 与 `learner_profile.json` 编写正文、一手硬实操、配图与闭环习题，并将实际检索采用的链接填入 `references`。
-4. **零背景读者逐句拷问 + 自动质量校验（必须 0 错误，且清零“缩写裸奔/黑盒数字”警告）**：
-   - 先站在完全没听过这些概念的新手视角通读一遍刚写好的 `ch1.json`：圈出每个缩写、每个举例数字（如“打分是 `{4, 2, 1}`”）和每个关键动作词，凡是未当场讲清“它是什么、怎么算出来的、尺度是什么”的，立刻就地补写 2~3 句人话机理；
-   - 再运行校验脚本：
-   ```bash
-   python3 ./scripts/validate_chapter.py <course_dir>/data/ch1.json
-   ```
-5. **编译到统一书库目录（当前已解锁章节 + 全书待学目录）**：
-   默认将每本新书建在 `~/.day-up/library/<book-slug>/`（例如 `~/.day-up/library/microeconomics/`；若用户显式指定了其他目录，编译后用 `--add <course_dir>` 挂进统一书架）：
-   ```bash
-   python3 ./scripts/build_courseware.py --data-dir ~/.day-up/library/<book-slug>/data --out ~/.day-up/library/<book-slug>/index.html
-   ```
-6. **启动或复用统一书库服务（固定 18770 端口，禁止每本书新开端口）**：
-   - 启动 `study_server.py` 时，**当前执行本 Skill 的 Agent 应直接把自己（当前宿主 CLI）的非交互单次调用命令通过 `--agent-cmd` 传入**（不确定自身参数或无头模式是否已登录授权时，先跑一次最小测试命令确认能正常返回文本；命令中含 `{prompt}` 时按参数传递，否则经 `stdin` 传递）：
-   ```bash
-   python3 ./scripts/study_server.py --port 18770 --agent-cmd "<当前宿主 CLI 的非交互调用命令>"
-   ```
-   - 若统一书库已在 `18770` 运行，脚本会自动检测并复用（直接返回提示，不抢端口）；若当前运行环境无独立 CLI，省略 `--agent-cmd` 启动即可，页面右侧始终统一显示“当前 Agent”。
-   告知用户统一书架地址 `http://127.0.0.1:18770/` 与本书直达地址 `http://127.0.0.1:18770/books/<book-slug>/`，引导其按目录学习第 1 章。
+Before writing any chapter, **read both** [Cross-Disciplinary Pedagogy & Hands-On Standards](./references/pedagogy-and-style.md) and [Plain Human Voice, Progressive Reasoning & Concept Budget](./references/human-voice-and-logic.md), enforcing all six non-negotiable standards (**across every discipline, not just coding**):
 
-### 阶段 B：读进度 → 动态调档 → 补短板 → 逐章推进（后续每一轮）
-1. **读取实时档案与画像**：先用 `read_file` 读取 `<course_dir>/progress.json`（或 `progress_report.md`）与 `<course_dir>/learner_profile.json`，确认已掌握小节、标记疑问与错题。
-2. **先解惑并动态调档**：针对用户错题与疑问给出一对一清晰补充讲解；按 [动态调档规范](./references/learner-adaptation.md) 依据掌握度自动更新 `learner_profile.json`（吃力则降速加细、轻松则提速加深），并用一句话向用户确认下一章的难度与代码/原理配比。
-3. **先立因果骨架，再联网写下一章并更新整书**：先锁定第 `N+1` 章的节间因果骨架，再对下一章主题主动执行 `search_web`（对照 [权威信源库](./references/authoritative-sources.md) 核实最新文档与实战案例），按调整后的档位编写 `ch(N+1).json` → `validate_chapter.py` → 重新执行 `build_courseware.py` 更新 `index.html`，提醒用户刷新页面即可接着读下一章。
+- **Draft a Chapter Causal Spine before writing JSON (eliminates disjointed sections)**:
+  - **Never write `chN.json` cold from top to bottom!** Lock each section's 3-part spine first: **[Bottleneck inherited from previous section] → [1 core mechanism + concrete hands-on artifact] → [New boundary handed to next section]**;
+  - If swapping two adjacent sections still reads fine, there is no real causal progression—reorder them. Every section after Section 1 must open its first 1–2 sentences by picking up the exact open question left at the end of the previous section.
+- **Situation → Step-by-Step Process → Name Last + Actor-Action-Visible-Change prose (eliminates robotic AI voice)**:
+  - Never open by dumping an abstract definition or verdict! Lay out **who is where, with what constraints, trying to do what** in 2–3 sentences, walk step-by-step through what changes and where it gets stuck, and only name the formal term once the reader already sees why it must exist;
+  - **Kill nominalized AI filler**: Favor concrete actors, active verbs, and visible outcomes; ban bureaucratic filler (`"serves as a paradigm"`, `"leverages... to facilitate"`, `"aims to optimize"`, `"inherently exhibits"`, `"empowers"`, `"holistic dimension"`, `"it is worth noting that"`, and their equivalents in whatever language you write);
+  - **Control sentence rhythm**: Short, direct sentences; **at most 1 em-dash (`——` / `—`) per paragraph**; no sprawling parenthetical nesting; no podcast cliffhanger hooks; no name-dropping random blog quotes for authority (put citations in `references`); never recite multi-line code/equations inline inside prose; never substitute shallow metaphors for real mechanisms.
+- **Every Chapter Must Include Hands-On Practice (eliminates theory-only opening chapters)**:
+  - **Programming / AI / Systems / Networking**: ≥ 2 real, complete, runnable core code snippets / protocol traces per chapter (10–30 lines; no 0-code theory chapters, no scripted `fakeBrain` toys);
+  - **Math / Physics / Engineering**: ≥ 2 complete step-by-step worked examples + geometric/physical diagrams + tiny concrete numerical checks from start to finish;
+  - **Economics / Finance / Accounting / Business**: ≥ 2 real line-by-line accounting/financial/supply-demand tables (`table`) or empirical policy/business decompositions;
+  - **Medicine / Biology / Psychology**: ≥ 2 concrete clinical case differential diagnoses (chief complaint → vitals/labs → pathophysiology chain → exclusion table) or classic experiment control/treatment breakdowns;
+  - **Law / History / Philosophy / Design / Arts**: ≥ 2 real case-law element-by-element analyses (facts → issue → statutory elements → holding) or primary-source / before-and-after artifact critiques;
+  - Follow every artifact with a **`□` key-step breakdown + counterfactual "what breaks if we delete/change this step?" analysis**.
+- **Concept Budget + Book-Wide Concept Ledger (eliminates random unexplained jargon)**:
+  - **Hard cap of ≤ 3 new core concepts per section (warn above 4)**: Never casually name-drop side concepts! For any non-core concept (whether domain compound words, printed output labels like `Left cluster mean`, lowercase technical jargon like `logits / sigmoid / on-policy / placebo`, or symbols like `η`): **first choice—delete the term and describe the action in plain words**; second choice—defer to its dedicated chapter;
+  - **Zero naked terms & zero forward references**: Every new concept, coined phrase (including labels printed inside code outputs), acronym, or symbol **must be explained right where (or right before) it first appears**, never used naked first and defined in a later section. Prose must read smoothly without clicking any glossary popover;
+  - **Zero black-box magic numbers + no doubled terms**: Every concrete score, metric, probability, price, or lab value must state **who computed/measured it, how inputs became that number, and its scale/normal bounds**. Never double a term before `{{term:...}}` (❌ `LLM{{term:LLM|...}}`), and write **~20–50 English words (or 25–90 CJK chars)** of genuine micro-lesson content inside every term gloss.
+- **Ban "Defensive Textbook Writing" & Require Level-Matched Code/Formula Derivations (All Disciplines)**:
+  - **Happy path first, guards/exceptions second**: Never cram defensive caveats (`try/finally`, legal provisos, rare differentials, edge-case qualifiers) into the first pass before the reader understands the baseline path. Complete the minimal core first, then ask *"What happens if something goes wrong mid-way?"* to introduce the guard naturally;
+  - **Zero-jump micro-steps + voice the reader's silent doubt**: Never skip two causal links (`A → C` must expand into `A → B → C`). Ban hand-waving phrases across all disciplines (`easily seen`, `obviously follows`, `by simple rearrangement`, `inevitably leads to`, `needless to say`, `self-evident`, and their equivalents in any target language). Show the naive attempt hitting a wall, explicitly voice the reader's likely objection, and recap briefly every 2–3 steps;
+  - **Zero-jump formulas & level-matched per-API code breakdown**: Every core `eq` must explain the concept first → `□` symbol-by-symbol breakdown → explicit intermediate algebraic steps (never consecutive `eq` blocks with a 1-line bridge) + 2–3 small-number hand verification. For code, **consult `learner_profile.json`**: when `coding_level` is `none` or `basic`, **explain EVERY custom function and EVERY non-trivial library API/method called in the code** (purpose, arguments, return shape)—never cherry-pick 3 lines and leave 10 functions unexplained!
+- **Practical, Grounded Quizzes Across All Disciplines (Zero Knowledge Gaps, Zero Shallow Rote Recall)**:
+  - Ban AI clichés; include 5–7 single-choice + 3–4 short-answer questions per chapter with valid `ref` links;
+  - **100% Knowledge Grounding**: Every concept, variable, symbol, and API tested in `q`, `options`, `answer`, or `explain` must be explicitly taught in the chapter body (specifically in `ref`)—zero untested/unmentioned identifiers or missing prerequisites;
+  - **Engineering Practice & Real-World Theoretical Depth**: At least **70% of single-choice and 100% of short-answer questions** must test **practical debugging, real-world scenario diagnosis, quantitative calculation, counterfactual fault injection, or case/policy trade-offs**—never populate quizzes with shallow "Which is the definition of X?" rote recall.
 
-### 阶段 C：课中随时答疑、专有名词弹窗与右侧伴学联动
-- **自动专有名词弹窗**：渲染引擎会自动把全章已登记术语（行内 `{{term:词|释义}}` 或 `term` 块）在正文各处挂上交互暗标——用户**鼠标移上去即看释义，点击固定并可一键“✦ 深入讲解”**；也可直接**划选任意不懂的句子/公式**点“✦ 追问”。
-- **右侧伴学栏直接连接“当前正在使用的 Agent”（单一宿主绑定，零下拉框干扰）**：
-  - **宿主直连协议（通用任意 CLI Agent）**：执行本 Skill 的当前 Agent 启动 `study_server.py` 时，通过 `--agent-cmd "<自身非交互命令>"` 把右侧伴学栏直接绑定到自己（含 `{prompt}` 则按参数传，否则经 `stdin` 传）；页面右侧统一显示 `当前 Agent`，**不罗列一堆无关 CLI 下拉框让用户选**；
-  - **跨 CLI 健壮执行 + 自动兜底**：服务端统一处理 UTF-8 编码、Windows `.cmd`/`.exe` 解包、非 Git 目录兼容、嵌套会话环境变量清理与 ANSI 去色，确保主流与自定义 CLI 都能直接跑通；省略 `--agent-cmd` 时自动按当前宿主环境匹配，无 CLI 时无缝退化为 `agent_chat.json` 桥接（可用 `reply_agent.py` 回写）。
-- **直问 AI 答疑人话铁律（聊天窗口直接问 & 右侧伴学栏问，两处统一生效）**：
-  1. **严禁背词典、复读原文、说 AI 公文腔**：禁用「旨在 / 致力于 / 通过…从而实现… / 进行…处理 / 某种程度上 / 底层自动处理 / 大概就是 / 简单来说就是一种机制」；每段最多 1 个破折号、禁止长括号套娃；
-  2. **先摆情况，再用具体主语+动作直击因果**：先用 1~2 句把具体现场摆出来，说清「谁对谁做了什么 → 哪个值或结果立刻变了」，紧跟一个极小具体数字、真实样例或「删掉/改掉它立刻出什么事故」的反例；
-  3. **紧跟当下主流口径**：若用户问到的概念或接口近两年已有更现代的主流做法，主动补一句提醒；
-  4. **手把手带练排障 + 10 秒微校验**：实操报错一步一动作、一步一验收，结尾用 1 个极轻反问确认用户真懂；若是关键盲区，同步更新 `learner_profile.json` 并在需要时补回当前章 `chN.json` 重编。
+---
+
+## 5. Standard Execution Workflow
+
+### Phase A: Learner Profiling & Book Setup (First Request)
+1. **Brief profiling (`learner_profile.json`)**: Read [Learner Profiling & Dynamic Adaptation](./references/learner-adaptation.md). If the user hasn't stated their background, ask ≤ 3 concise questions (prefer `ask_question`) covering: **① subject familiarity, ② coding/math/domain practice level, ③ learning goal** (skip dimensions already stated). Save to `~/.day-up/library/<book-slug>/learner_profile.json`.
+2. **Verify current sources, plan an 8–20 chapter mastery syllabus & validate it**:
+   - Consult [Book Architecture](./references/book-architecture.md) and [Authoritative Sources](./references/authoritative-sources.md); run `search_web` to anchor current standards and chapter progression;
+   - Create `~/.day-up/library/<book-slug>/data/course.json` (8–20 chapters, 4-stage progression, with `part`, `prerequisite`, `bridgeToNext`, `capstoneDeliverable`, and 4–6 sections per chapter) and validate with 0 errors:
+     ```bash
+     python3 ./scripts/validateSyllabus.py ~/.day-up/library/<book-slug>/data/course.json
+     ```
+   - Present the syllabus (including part goals and capstone deliverable) to the user for confirmation before drafting Chapter 1.
+3. **Draft the Chapter 1 causal spine, research live sources & author `ch1.json`**:
+   - Lock Chapter 1's section-by-section causal spine per [Human Voice & Logic](./references/human-voice-and-logic.md);
+   - Run targeted `search_web` per section for authoritative standards and recent real-world cases; author `ch1.json` strictly matching `learner_profile.json`, [Pedagogy & Style](./references/pedagogy-and-style.md), [Schema & Style](./references/schema-and-style.md), and real verified `references`.
+4. **Zero-background reader audit + automated chapter validation (0 errors, clear warnings)**:
+   - Read `ch1.json` as a fresh reader: verify every acronym, coined Chinese/English term, code output label, called library function, magic number, derivation step, and quiz identifier is fully explained and grounded;
+   - Run the validator:
+     ```bash
+     python3 ./scripts/validate_chapter.py ~/.day-up/library/<book-slug>/data/ch1.json
+     ```
+5. **Compile into the fixed unified library directory**:
+   ```bash
+   python3 ./scripts/build_courseware.py \
+     --data-dir ~/.day-up/library/<book-slug>/data \
+     --out ~/.day-up/library/<book-slug>/index.html
+   ```
+6. **Start or reuse the fixed single-port bookshelf (`18770`, never open a second port)**:
+   - Pass the active host CLI's non-interactive invocation command via `--agent-cmd` (verify with a minimal test if unsure; `{prompt}` passes as an argument, otherwise via `stdin`):
+     ```bash
+     python3 ./scripts/study_server.py --agent-cmd "<current host CLI non-interactive command>"
+     ```
+   - If the unified bookshelf is already running on `18770`, `study_server.py` detects and reuses it automatically (zero extra ports); omit `--agent-cmd` if no standalone CLI exists (the UI seamlessly uses `agent_chat.json` bridge mode).
+   - Share the bookshelf URL `http://127.0.0.1:18770/` and direct book URL `http://127.0.0.1:18770/books/<book-slug>/`.
+
+### Phase B: Read Progress → Adapt Level → Close Gaps → Unlock Next Chapter
+1. **Read live state**: Read `<book_dir>/progress.json` (or `progress_report.md`) and `learner_profile.json` to inspect mastered sections, doubt notes, and quiz mistakes.
+2. **Resolve doubts & adapt difficulty**: Give targeted, plain-language explanations for all doubts/mistakes; update `learner_profile.json` per [Learner Adaptation](./references/learner-adaptation.md) (slow down and unpack finer if struggling; accelerate and deepen if acing it) and confirm the pacing for the next chapter in one sentence.
+3. **Draft & unlock Chapter `N+1`**: Lock its causal spine → verify live sources → author `ch(N+1).json` → run `validate_chapter.py` → recompile `index.html` via `build_courseware.py` → tell the user to refresh their existing browser tab.
+
+### Phase C: Inline Glossary Popovers, Companion Agent & Direct Q&A Rules
+- **Interactive glossary & highlight-to-ask**: Every registered term automatically gains subtle inline highlights (hover to preview, click to pin + `✦ Explain Deeper`); highlighting any passage pops up `✦ Ask`.
+- **Single active-Agent companion pane (zero dropdown clutter)**:
+  - The right pane connects directly to the active Agent bound via `--agent-cmd` (showing uniformly as `Current Agent`, with automatic UTF-8, ANSI-strip, Windows `.cmd`/`.exe` unwrapping, non-Git compatibility, and nested-session env cleanup) or falls back cleanly to the `agent_chat.json` bridge (`reply_agent.py`).
+- **Plain human-voice direct Q&A rules (apply both in main chat and in the companion pane)**:
+  1. **Progressive reasoning, zero defensive leaps**: Lay out a minimal scenario in 1–2 sentences, walk step-by-step (`A → B → C`) through the baseline before introducing exceptions or guards, and never recite dictionary definitions or repeat the textbook verbatim;
+  2. **Respect concept budget & ban AI filler**: Never drop unexplained extra jargon the user didn't ask about; explain unavoidable new terms inline in half a sentence; ban robotic filler and limit to ≤ 1 em-dash per paragraph;
+  3. **Concrete proof + current-era check**: Anchor every answer with 2–3 tiny numbers, a concrete example, or "what breaks if we remove it", noting modern replacements if the asked method is outdated;
+  4. **Quick 10-second verification**: End with 1 light check question; if a major blind spot surfaced, update `learner_profile.json` and patch the current chapter JSON when helpful.

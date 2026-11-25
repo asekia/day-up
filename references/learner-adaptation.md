@@ -1,65 +1,65 @@
-# 学习者摸底评估与动态调档规范
+# Learner Profiling & Dynamic Adaptation Protocol
 
-> 本文件用于确保 AI 在**建课之前先摸清用户底细**，并在**逐章推进过程中依据真实进度与掌握反馈持续动态调档**，既不拿“太基础的废话”浪费高手时间，也不拿“超纲黑话与复杂代码”劝退新手。
+> Ensures the Agent **profiles the learner before drafting the book** and **dynamically adjusts depth, code unpacking, and pacing between chapters** based on real mastery data—never wasting an expert's time on basics, and never burying a beginner in unexplained jargon or black-box code.
 
 ---
 
-## 一、开课前极简摸底（必做，控制在 3 个核心问题内）
+## 1. Brief Pre-Course Profiling (Mandatory, ≤ 3 Concise Questions)
 
-收到用户的学习主题后，**先不要直接生成整章内容**；若用户未说明背景，优先用简短多选题（如 `ask_question`）或 3 行简洁提问快速摸底（用户已明确说过的维度跳过不重复问）：
+When receiving a learning request, **do not immediately generate a full chapter**. Unless the user already stated their background, ask ≤ 3 brief questions (prefer multiple-choice `ask_question`; skip dimensions already stated):
 
-1. **当前对该主题的了解程度**
-   - 零基础，希望从头讲起
-   - 听过概念/看懂大概，但没系统串起来或没实操过
-   - 日常已经在用，想深挖底层原理、边界与踩坑
-2. **代码 / 实操与数理基础**（按学科自动替换：编程/AI 课问代码与数学；金融/设计/法律课问对应工具与实务基础）
-   - 几乎不写代码（偏重直觉、图解与现成工具操作）
-   - 会基础脚本（如 Python / JS 等，能跑通并读懂 20~50 行示例）
-   - 工程熟练（可直接看核心源码片段、复杂配置与性能调优）
-3. **本次学习目标**
-   - 快速上手能干活（重实操步骤与高频坑）
-   - 吃透底层逻辑（重推导、对比与系统全局）
-   - 围绕手头某个具体项目/问题边做边学
+1. **Current familiarity with the topic**
+   - Complete beginner—start from scratch
+   - Heard the concepts / general intuition, but haven't connected the system or practiced hands-on
+   - Already using it in practice—want deeper mechanisms, edge cases, and production pitfalls
+2. **Coding / hands-on & quantitative comfort** (adapt to the discipline: coding/math for CS/AI; spreadsheets/cases/statutes for finance/law/medicine)
+   - Little or no coding (favor intuition, diagrams, and guided minimal walkthroughs)
+   - Basic scripting (e.g., Python/JS—can follow and run 20–50 line scripts if APIs are clearly explained)
+   - Proficient engineer (ready for production source paths, config diffs, and performance tuning)
+3. **Primary learning goal**
+   - Get hands-on quickly (practical steps and high-frequency pitfalls)
+   - Master underlying principles (derivations, contrasts, and system-wide architecture)
+   - Learn around a concrete project, role, or problem at hand
 
-摸底结果持久化保存为 `<course_dir>/learner_profile.json`，供后续每一章读取与更新：
+Persist the profile to `~/.day-up/library/<book-slug>/learner_profile.json` so every subsequent chapter reads and updates it:
 
 ```json
 {
-  "topic": "课程主题",
+  "topic": "Course subject",
   "domain_level": "beginner | intermediate | advanced",
   "coding_level": "none | basic | proficient",
   "math_comfort": "low | medium | high",
   "goal": "hands_on | deep_understanding | project_driven",
   "preferred_language": "python",
-  "skip_topics": ["用户已掌握、跳过不讲的前置知识"],
+  "skip_topics": ["Prerequisites the learner already mastered"],
   "adaptation_log": [
-    { "after_chapter": 1, "signal": "quiz 50%, 1 doubt", "action": "放慢节奏，增加分步示例与生活类比" }
+    { "after_chapter": 1, "signal": "quiz 50%, 1 doubt", "action": "Slow down, unpack every API call, add step-by-step small-number walkthroughs" }
   ]
 }
 ```
 
 ---
 
-## 二、动态调档矩阵（按画像调整写法、代码、图示与习题）
+## 2. Adaptation Matrix (Match Prose, Code Breakdown, Diagrams & Quizzes to Profile)
 
-| 维度 | 零基础 / 无代码基础 | 有基础 / 会写简单脚本 | 进阶 / 工程熟练 |
+| Dimension | Zero / Non-Coding Background | Basic Scripting / Intermediate | Proficient / Production Engineer |
 |---|---|---|---|
-| **切入方式** | 贴近日常生活的具体画面，零前提铺垫 | 贴近日常开发/业务场景，直接跳过已知前置 | 直奔工程痛点、瓶颈与真实事故复盘 |
-| **代码形态** | 尽量免代码或只给 5~15 行最小可运行脚本，**对代码里出现的每一个函数、库 API 与关键参数逐一用白话讲清用途与输入输出** | 给 15~35 行最小可运行脚本 + 真实运行输出，**严禁只挑两三行敷衍：凡首次出现的自定义函数、框架 API（如 `nn.Linear` / `optim.Adam` / `randn` vs `rand` / `torch.full` / 掩码切片）必须按组逐个讲透用途、参数含义与返回形状** | 给贴近生产环境的核心实现/源码关键路径与性能实测；可跳过基础语法，但仍须讲清领域框架特有 API 与踩坑约定 |
-| **公式与理论** | 只留最核心直觉关系，公式必配白话翻译和极小手算数字 | 关键推导保留，每步给可手算样例（如 5 元素小例子） | 保留严谨命题/推导，重点剖析隐含假设与失效条件 |
-| **图示侧重** | 多用 `side_figure` 直观概念/包含关系图 | 结构图 + 请求/数据流向时序图并重 | 架构权衡图、状态机、性能/损失曲线探索器 |
-| **习题难度** | **拒绝死背概念定义题**！出贴近日常直觉的小场景判断、极小数字手算与“改掉一步会怎样”的因果题（100% 闭环于正文） | **专注工程实践与现实问题**：代码排障（删掉/写反某行会报什么错）、输出读数诊断、方案选型权衡与定量推演（100% 闭环于正文） | **一线实战深水题**：线上事故根因定位、多约束架构权衡、反例构造与边界失效推演（100% 闭环于正文） |
+| **Entry Point** | Everyday concrete scenes, zero assumed jargon | Practical dev/business scenarios, skip known basics | Engineering bottlenecks, failure logs, and postmortems |
+| **Code & API Breakdown** | Minimal 5–15 line runnable scripts (or zero code for non-CS); **explain every single function, library API, and parameter in plain language with input/output shapes** | 15–35 line minimal runnable scripts + real outputs; **never cherry-pick 3 lines—explain EVERY custom function and EVERY newly appearing library API/method (`nn.Linear`, `optim.Adam`, `randn` vs. `rand`, `torch.full`, boolean masks) with purpose, arguments, and return shape** | Production core implementations, source-level key paths, and benchmarks; skip basic syntax, but still explain domain-framework APIs and subtle sign/convention traps |
+| **Formulas & Theory** | Core intuitive relations with plain-language translation and tiny hand-worked numbers | Full key derivations with tiny hand-verifiable numerical checks (e.g., 2–5 element cases) | Rigorous propositions/derivations focusing on hidden assumptions and failure boundaries |
+| **Visuals** | Clean `side_figure` concept/relationship diagrams and step animations | Architecture diagrams + request/data-flow animated diagrams | Trade-off matrices, state machines, and interactive curve explorers |
+| **Quiz Depth** | **Ban rote definition quizzes!** Everyday diagnostic mini-scenarios, tiny hand calculations, and "what breaks if we change step X?" (100% grounded in prose) | **Engineering & real-world practice**: debugging broken/omitted code lines, output diagnosis, design trade-offs, and quantitative checks (100% grounded in prose) | **Deep-water practical diagnostics**: production root-cause analysis, multi-constraint trade-offs, counterexamples, and boundary failures (100% grounded in prose) |
 
 ---
 
-## 三、学习过程中的章间动态调档（基于 `progress.json`）
+## 3. Chapter-to-Chapter Dynamic Adaptation (Driven by `progress.json`)
 
-每当用户学完当前章、准备进入下一章时，AI 读取 `<course_dir>/progress.json` 后必须做一次**轻量诊断并动态微调 `learner_profile.json`**：
+Before authoring Chapter `N+1`, read `<book_dir>/progress.json` to run a quick diagnostic and update `learner_profile.json`:
 
-1. **信号 1：掌握吃力（正确率 `< 60%` 或标记了 ≥ 2 个疑问）**
-   - 先用更通俗的新例子或步进推演把本章卡壳点讲透，绝不硬推下一章；
-   - 写入 `adaptation_log`：下一章**自动降速拆细**（每节拆小、减少代码体量、增加中间过渡图与生活类比）。
-2. **信号 2：轻松吃透（全节 `✓ 已掌握` 且正确率 ≥ 90%，或用户反馈“太简单/节奏慢”）**
-   - 写入 `adaptation_log`：下一章**自动提速加深**（砍掉入门铺垫，提高代码实战密度、加入真实踩坑与边界反例）。
-3. **信号 3：用户临时调整诉求（如“这章我想多写点代码 / 少看点公式”）**
-   - 立即更新 `learner_profile.json`，并在生成下一章大纲细化前用一句话确认调档方向（例如：“看你第 1 章全对且反馈偏简单，第 2 章我跳过基础用法，直接上源码实现和真实报错排查，你看合适吗？”）。
+1. **Signal 1: Struggling (`quiz < 60%` or `≥ 2` doubt notes)**
+   - Resolve every stuck point with fresh plain-language examples before unlocking the next chapter;
+   - Record in `adaptation_log`: slow down next chapter (smaller sections, shorter code blocks, finer per-API breakdown, extra transition diagrams).
+2. **Signal 2: Mastering effortlessly (all sections `✓ Mastered`, `quiz ≥ 90%`, or user says "too easy")**
+   - Record in `adaptation_log`: speed up and deepen next chapter (trim intro scaffolding, raise engineering density, add real edge-case failures).
+3. **Signal 3: Explicit user preference shift (e.g., "more code / fewer equations")**
+   - Update `learner_profile.json` immediately and confirm the adjusted balance in one sentence before drafting the next chapter.

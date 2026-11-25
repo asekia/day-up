@@ -1,127 +1,103 @@
-# Z-Lib 经典纸书全学科叙事逻辑、说人话标准与每章硬实践规范
+# Cross-Disciplinary Classic Textbook Narrative, Plain-Language Standards & Practical Exercises
 
-> 本文件适用于**所有学科**（不只计算机与代码，同样覆盖数学、物理、经济金融、医学、生物、法学、历史、心理学、设计与艺术），专门根治 AI 写教材最让人读得费力的四大通病：**① AI 思维卡片式罗列而非因果推进（读着累、抓不住主线）**；**② 破折号/括号套娃/播客卖关子腔（不说人话）**；**③ 前几章纯空谈、缺少该学科真正的一手实操载体（代码/例题/账表/病例/判例/原典拆解）**；**④ 术语裸奔与黑盒魔法数字**。
-
----
-
-## 一、Z-Lib 经典纸书为什么跨学科都好读？（费曼 × Strang × 曼昆 × 崔庆才的共通法则）
-
-无论翻开物理学的《费曼物理学讲义》、数学的 Gilbert Strang《线性代数导论》、经济学的曼昆《经济学原理》、法学的请求权基础教材，还是编程的《Crafting Interpreters》《Python 3 网络爬虫开发实战》，它们让读者读起来毫不费力，靠的都是同一套底层心法：
-
-### 1. 读者假设：“聪明的零基础室友”（Mankiw Standard）
-- 把读者当成**智商在线、但对本学科行话零背景的聪明人**：绝不居高临下灌水敷衍，也绝不假设读者早就背过任何术语、公式或行业黑话。
-
-### 2. 叙事骨架：单线「苏格拉底式因果拉链」（禁止 PPT 卡片式罗列）
-- **AI 思维（让人极度疲惫）**：每节先抛宏大总定义 → 摆出“五大件 / 三种套路 / 四个维度” → 搬出“某某专家/博客说过”撑门面 → 下一节突兀换题（“下面我们讲主题 B”）。读者像背百科目录，脑子里全是互不咬合的名词。
-- **Z-Lib 经典纸书思维（越读越顺）**：全章像拉拉链一样一环扣一环，严格遵循 **现象卡点 → 直觉 → 形式化概念 → 一手硬实操 → 反事实检验 → 引出下一节**：
-  1. **亮出真实谜题或卡点（Hook / Problem First）**：先摆出一个肉眼可见的真实场景——一个反直觉的经济现象（如房租管制为什么反而让租房更难）、一个具体临床主诉、一段真实案情、一个物理悖论，或一条报错/真实接口返回。**零铺垫、零卖关子**。
-  2. **先建直觉，再落形式化概念（Intuition Before Formalism）**：顺着上面的卡点，先用大白话和几何/图解把直观图像立起来，再引出精确的概念、公式、法条或数据结构。因为前面铺好了路，正式定义读起来会像“恍然大悟的总结”，而不是“天上掉下来的障碍”。**没有前面制造出需求，绝不凭空冒出新名词。**
-  3. **概念当场落地为该学科的「一手硬实操载体」（Concrete Worked Artifact）**：定义刚讲完，马上用该学科最硬核的一手演练把它坐实（代码 / 完整手推例题 / 真实账表核算 / 临床鉴别诊断 / 判例要件涵摄 / 一手史料与设计拆解），**绝不空谈三千字不给实操**。
-  4. **拆关键一步 + 反事实边界检验（Break It & Verify）**：紧跟实操，指明最关键的那一步/那一行/那个前提条件，追问并推演 **“如果删掉这一行、改掉这个假设、漏掉这项检查，结果会怎么立刻崩塌或反转？”**，并用极小具体数字或真实案例走完验收。
-  5. **拉链式过渡到下一节（Zipper Transition）**：本节末尾自然露出这套方法搞不定的新边界（例如：“刚才看清了市场均衡怎么形成；可如果政府强行给房租设上限，供求曲线会发生什么？”），下一节第一句直接接住这个尾巴往下写。
+> Applies to **every discipline** (not just programming—equally covers math, physics, economics, finance, medicine, biology, law, history, psychology, design, and arts). Designed to eliminate four classic AI textbook failures: **① PPT-card listing instead of causal progression**, **② em-dash/parenthesis nesting and podcast cliffhangers**, **③ theory-only opening chapters lacking hands-on artifacts**, and **④ naked concepts, black-box numbers, unexplained code APIs, and shallow rote quizzes**.
 
 ---
 
-## 二、全学科「每章硬实践」标准矩阵（不只是代码！所有学科都必须这样写）
+## 1. Why Classic Textbooks Read Effortlessly Across All Disciplines
 
-**彻底禁止**“前几章全是干巴巴的文字概念综述，拖到最后一章才给实操”的割裂写法！**无论哪一门学科，从第 1 章起每一章都必须配备 ≥ 2 处该学科真实的一手硬实操载体**，并严格配齐 **“关键一步拆解 + 改错/删掉会怎样的反事实推演 + 极小具体数据验收”**：
+Whether opening *The Feynman Lectures on Physics*, Gilbert Strang's *Introduction to Linear Algebra*, Mankiw's *Principles of Economics*, Pathoma, Wang Zejian's civil-law method, or *Crafting Interpreters*, they share one core craft:
 
-| 学科大类 | Z-Lib 经典对标 | 该学科的「一手硬实操载体」（每章 ≥ 2 处，禁止空谈与假玩具！） | 必须配齐的“改掉这一步会怎样”反事实推演 |
+1. **Reader Assumption ("Smart Zero-Background Roommate" — Mankiw Standard)**:
+   Treat the reader as highly intelligent with zero prior jargon in this field—never talk down, and never assume they already memorized any acronym, formula, or domain phrase.
+2. **Narrative Spine ("Socratic Causal Zipper", Never PPT Card Lists)**:
+   Every section progresses smoothly through **Real Friction → Intuition → Formal Concept → Hands-On Artifact → Counterfactual Break-Test → Zipper Bridge to Next Section**:
+   - **Problem First (Zero Cliffhangers)**: Open with a concrete observable puzzle—a counterintuitive economic outcome, a clinical complaint, a real lawsuit fact pattern, a physical paradox, or a real error/output;
+   - **Intuition Before Formalism**: Build the visual/mental model in plain speech before introducing symbols, equations, statutes, or code. Never introduce a term before creating the need for it;
+   - **Immediate Concrete Artifact**: Right after the concept clicks, ground it in a genuine hands-on artifact for that discipline (never talk abstractly for 2,000 words without practice);
+   - **Break It & Verify**: Point to the critical line/premise and ask *"What immediately collapses or flips if we delete this line, change this assumption, or skip this test?"*, then check with tiny concrete numbers or real facts;
+   - **Zipper Transition**: Expose the new boundary this method cannot handle at section end, and let the next section's opening sentence pick it up directly.
+
+---
+
+## 2. Cross-Disciplinary "Hands-On Every Chapter" Matrix
+
+**Never write theory-only opening chapters that postpone practice to the final chapter!** From Chapter 1 onward, **every chapter must include ≥ 2 genuine hands-on artifacts** paired with **key-step breakdown + counterfactual break-test + small concrete verification**:
+
+| Discipline | Classic Benchmarks | Required Hands-On Artifacts (≥ 2 per chapter; no fake toys!) | Required Counterfactual Break-Test |
 |---|---|---|---|
-| **编程 / AI / 系统 / 网络** | *Crafting Interpreters*、《Python 3 网络爬虫开发实战》、*DDIA*、*CSAPP* | **10~25 行真实可落地短代码 + 真实协议报文/配置 + 真实运行输出**（严禁 0 代码空谈章，严禁 `fakeBrain` 写死剧本） | 删掉某行护栏（如除零保护、超时、锁、终止条件）会报什么具体错或输出什么离谱值 |
-| **数学 / 统计 / 物理 / 工程** | 《费曼物理学讲义》、Strang《线性代数导论》、*概率论与数理统计* | **完整手推例题（Worked Example）+ 几何/受力图解 + 极小具体数字从头算到尾**（如 2×2 矩阵、3 个样本点，严禁跳步写“易得”） | 改掉一个前提（如行列式为 0、样本不独立、忽略摩擦或非正态）原定理/公式在哪一步立刻失效 |
-| **经济学 / 金融 / 会计 / 商业** | 曼昆《经济学原理》、达莫达兰《估值》、经典财报教材 | **真实账表/财报逐行核算表（`table`：如三张表联动、DCF/弹性/边际收益具体数字表）+ 真实商业/政策事件实证拆解** | 改一个外部冲击或会计假设（如租金上限、利率涨 100bp、存货计价换法），曲线或报表哪几行联动变化 |
-| **医学 / 生物学 / 心理学** | 《生理学》、坎贝尔《生物学》、卡尼曼《思考，快与慢》 | **真实临床病例 / 经典实验原始数据拆解**（主诉 → 体征与化验具体数值 → 生理/病理因果链 → 鉴别诊断排除表；实验组 vs 对照组数据） | 漏做哪项关键检查会直接误诊？改掉哪个实验控制变量会让结论完全反转？ |
-| **法学 / 公共政策** | 大陆法请求权基础教材、英美判例法教材 | **完整真实判例三段论涵摄**（案情事实 → 争议焦点 → 具体法条构成要件逐项比对 `□` → 裁判理由与结论） | 把案情里某一个关键事实改掉（如主观过错、时间节点、因果关系或举证责任），判决如何立刻逆转 |
-| **历史 / 哲学 / 文学 / 设计 / 艺术** | 《枪炮、病菌与钢铁》、唐·诺曼《设计心理学》、经典史学/乐理教材 | **一手原典/史料/作品/界面逐层拆解**（原始引文逐句细读、真实年代/地理约束表、改版前后界面对比、具体和声/构图拆解） | 拿掉一个历史地理约束、论证前提或界面反馈线索，原历史走向/论证/用户体验为何坍塌 |
+| **CS / AI / Systems / Networking** | *Crafting Interpreters*, *DDIA*, *CSAPP* | **10–30 line real runnable code + real protocol traces/configs + real output** (no 0-code chapters, no hardcoded `fakeBrain` scripts) | Exact error or wrong output if a key guard/line (zero-grad, timeout, lock, mask, sign) is deleted or flipped |
+| **Math / Statistics / Physics / Eng.** | *Feynman Lectures*, Strang, Griffiths | **Complete hand-worked examples + geometric/force diagrams + tiny numerical checks from start to finish** (zero `"easily seen"` leaps) | Exact step where a theorem/formula breaks if an assumption (non-zero determinant, independence, zero friction) fails |
+| **Economics / Finance / Accounting** | Mankiw, Damodaran, classic accounting texts | **Line-by-line schedules/financial tables (`table`) + empirical policy/business case decompositions** | Which rows/curves shift and why when a shock hits (rent cap, +100bp rate hike, inventory method switch) |
+| **Medicine / Biology / Psychology** | *Pathoma*, *Guyton*, Campbell, Kahneman | **Real clinical case differentials** (complaint → vitals/labs → pathophysiology chain → exclusion table) or classic control vs. treatment data | Which skipped test causes fatal misdiagnosis? Which altered control variable flips the experimental conclusion? |
+| **Law / Public Policy** | Continental claim-basis & common-law casebooks | **Full real-case syllogism** (facts → issue → element-by-element statutory check `□` → holding) | How changing one key fact (fault, timing, causation, burden of proof) immediately reverses the verdict |
+| **History / Philosophy / Design / Arts** | *Guns, Germs, and Steel*, *Design of Everyday Things* | **Primary-source / artifact close reading** (raw quotes, geographic/chronological tables, before/after UI or musical harmony breakdown) | How removing one geographic constraint, logical premise, or UI signifier collapses the historical outcome or usability |
 
 ---
 
-## 三、说话方式与句法：彻底戒掉 AI 腔，写出纸书呼吸感
+## 3. Prose & Rhythm Rules (Eliminate AI Tone)
 
-1. **短句直说，严禁括号套娃**：
-   - 正常纸书平均句长 **18~35 字**，一句只说一件事；
-   - ❌ 严禁：`它特指以大语言模型（LLM，Large Language Model，即「输入一段文字、输出下一段文字」的神经网络）为大脑的软件智能体——你常用的对话产品是「模型本体」。`
-   - ✅ 纸书写法：`这套系统的核心是大语言模型（LLM，Large Language Model）。LLM 接收一段文本并预测后续文本。平时聊天的只是模型本体，而 Agent 是在外面套了一层能调用工具、循环执行的程序外壳。`
-2. **严控破折号 `——`（每段最多 1 个！）**：
-   - AI 极度迷恋用 `——` 把两三层不同维度硬粘成一句长蛇句。能用句号断成两句的，一律用句号。
-3. **禁止在正文段落里“口播代码/算式”**：
-   - 代码一律进 `code` 块，核心算式进 `eq` 块，账表/对照进 `table` 块，正文只用流畅的中文把逻辑讲透，绝不把 3 行伪代码或一串括号公式塞进汉字段落里念。
-4. **戒掉播客悬念腔与“搬运博主/权威语录撑门面”**：
-   - 严禁写“学一个新概念，最快的方法不是先背定义……”“上一章留了一句话没展开……”“为什么这个听起来无害的属性恰恰是根源，而突破口的钥匙也藏在同一句话里”这类播客卖关子废话；
-   - 严禁每节动不动写“某某工程团队给过一个很精确的说法……”“某博客指出……”。真书作者是自己把道理彻底消化后直接讲给读者听；参考来源统一放进章末 `references`（仅在交代专有术语出处、历史原典或一手实验数据时自然提及）。
-5. **戒掉“廉价比喻替代本体”**：
-   - 诸如“大脑/手脚/插座/白板/考试举手/员工手册/过路费”这类浅层比喻最多点缀半句，绝不能占一整段、更不能替代真实的对象结构、因果机理与一手演练。
-6. **短段舒展 + `h4` 子节分层**：
-   - 每段严格控制在 **90~200 字（2~4 行）**，单段绝不超过 260 字；每节（`h3`）正文只要超过 600 字，**必须**用 `h4`（`1. ...`、`2. ...`）清晰分层。
+1. **Short direct sentences; zero parenthetical nesting**: Keep sentences concise (one idea per sentence); break long parenthetical clauses into separate sentences.
+2. **At most 1 em-dash (`—` / `——`) per paragraph**: Use periods instead of chaining three clauses with em-dashes.
+3. **Never recite code or formulas inline inside prose**: Put code in `code`, equations in `eq`, comparisons/schedules in `table`; keep prose fluent and readable.
+4. **Ban podcast cliffhangers and authority name-dropping**: Never open with *"The fastest way to learn X is..."* or *"As a famous engineering blog once put it..."*—digest ideas completely and speak directly as the author; place sources in `references`.
+5. **No cheap metaphors replacing real mechanisms**: Limit light analogies to half a sentence; never spend a full paragraph on "brain/hands/whiteboard" analogies instead of the real mechanism.
+6. **Breathable paragraphs + `h4` hierarchy**: Keep paragraphs compact (90–220 CJK chars / ~50–110 English words, never > 280 CJK chars); use `h4` subsections whenever an `h3` exceeds ~600 CJK chars (~350 words).
 
 ---
 
-## 四、人类教科书“零跳步”铁律 + 公式四步深讲
+## 4. Zero-Jump Textbook Laws: Concept Budget, Anti-Defensive Derivation & Level-Matched Code
 
-### 1. 零跳步铁律：概念预算制 + 全书概念账本（严禁莫名冒出未解释概念与黑盒数字）
-- **概念预算硬上限（每节新概念 ≤ 3 个，绝不顺嘴掉书袋）**：不要在正文里顺嘴甩出一堆本节并不主讲的边缘术语（不管是中文词如“闭式解 / 拉格朗日乘数 / 无谓损失 / 射血分数 / 阻却违法事由”，还是英文词如 `logits / token / sigmoid / on-policy / placebo`）。凡是非本节主角的概念：**① 首选直接删掉名字、改用大白话描述动作；② 次选延后到它真正登场的章节；③ 实在躲不开必须当场 1 句话白话落地**。
-- **概念账本闭合（严禁“有的解释、有的没解释”、严禁“中文自造/组合词裸奔”与“先用后讲”）**：任何新概念、中文领域组合词（如 `左簇均值 / 右簇均值 / 噪声方差曲线 / 广播 / 蒸馏`）、英文词、缩写、代码打印标签或特殊符号（如 `KL`、`RM`、`GDP`、`ECG`、`η`、`logits`、`sigmoid`、`表见代理`）**第一次出现在正文、代码输出或图注之前/当段**，必须当场交代其**是什么 + 在此处起什么作用**（完整写法见 [人话与推演示范库](./human-voice-and-logic.md) 第六节）。**严禁前文先裸用、后节再定义；严禁代码 `print(...)` 里突然冒出正文没解释过的新词；不点任何弹窗，正文自身必须从头顺畅读通**。
-- **黑盒魔法数字零容忍**：无论哪个学科，只要举例给出具体分数、指标、概率、金额或数组（如 `RM 打分是 {4, 2, 1}`、`血压 160/100`、`弹性系数 -2.4`、`RRF 0.032`），必须当场交代 **① 谁算/测出来的（来源或公式）② 输入怎么变成这个数 ③ 它的尺度、正常区间与边界是什么**。
-- **术语标记防叠字**：使用 `{{term:词|释义}}` 时严禁前面重复该词（❌ `LLM{{term:LLM|...}}` 会渲染成 `LLMLLM`，✅ 直接写 `{{term:LLM|...}}`）；释义须写成 **25~90 字微型微课**，禁止同义反复的空壳解释。
+### 1. Concept Budget & Book-Wide Concept Ledger (Zero Naked Terms or Magic Numbers)
+- **Hard cap of ≤ 3 new core concepts per section**: Never casually name-drop side terms. Prefer deleting non-core jargon in favor of plain action words, or deferring it to its dedicated chapter.
+- **Zero naked concepts, coined phrases, printed output labels, or forward references**: Every new concept, coined domain phrase (e.g., `Left cluster mean`, `broadcasting`), acronym, code `print(...)` label, or symbol **must be explained right before or where it first appears**. Never use a term naked early and define it later; prose must read smoothly without clicking any popover.
+- **Zero black-box magic numbers**: Every example score, metric, probability, price, or lab value must state **① who computed/measured it, ② how inputs produced it, ③ its scale and normal bounds**.
+- **No doubled term markers**: Never repeat a word right before `{{term:Word|...}}`; write **25–90 CJK chars (or ~20–50 English words)** of genuine micro-lesson explanation inside every gloss.
 
-### 2. 彻底封杀“防御性编书”：全学科零跳步推演铁律（不只数学与代码！）
-**什么是“防御性编书”？** 就是作者怕被人挑刺显得“不够专业/不够严谨”，于是在读者连主干逻辑还没走通时，就急着在正文里塞满高大上的补丁与终极术语（如代码的 `try/finally`、`clamp`、公式的“变分求极值”、法学的“除善意重大过失外”、医学的“需鉴别某某罕见症”、经济学的“不考虑流动性陷阱”），同时用一句“整理可得 / 易得 / 移项即可反解 / 由此必然导致”直接跳过真正的推理过程——**这是所有学科里最致命的逻辑断层**！
+### 2. Ban "Defensive Textbook Writing": Zero-Jump Derivations & Level-Matched Code
+**What is "Defensive Textbook Writing"?** Afraid of appearing insufficiently rigorous, the author dumps advanced safeguards and formal caveats (`try/finally`, `clamp`, *"variational extremum"*, legal provisos, rare differentials) before the reader grasps the main path, then skips actual reasoning with *"rearranging gives / obviously / inevitably leads to."*
 
-无论写哪一门学科，凡涉及因果推演、概念论证、公式推导或代码实现，必须严格守住五条铁律（完整跨学科正反示范见 [人话与推演示范库](./human-voice-and-logic.md) 第五节）：
-1. **先走通极简主干，再引出护栏与例外（严禁首遍混入防御性补丁）**：
-   - 先用极简场景把主线跑通（曼昆的孤岛、格里菲斯的理想对称、医学的单一器官通路、法学的正常无瑕疵案情、编程的不含异常保护主干）；
-   - 等读者懂了主干，再主动发问“如果中途出错/遇到极端情况怎么办？”，顺势引出 `try/finally`、法律但书、临床鉴别诊断或模型修正项。
-2. **严禁跨两步因果直跳（全学科禁用跳步偷懒词）**：
-   - 严禁把 `A → B → C` 压缩成 `A → C`，彻底禁用 `变分求极值即可得 / 移项易得 / 显然可得 / 同理可证 / 不难推出 / 由此必然导致 / 自然会引发 / 无需赘述 / 顾名思义`；
-   - 在读者脑子里正要起疑的地方停下来替读者发问（“听到这里你可能会问……”），先演一遍“朴素直觉为什么会撞墙”，再推下一步，每走 2~3 步做一次一句话阶段回头看。
-3. **核心公式必须“概念先透 + 逐行代数推导 + 小数字手算”**：
-   - 先讲清公式里每个新概念到底在量什么、为什么非它不可，再规范排版数学式并用 `□`（`enum` `style:"square"`）逐符号精拆；
-   - 从 `式 A` 到 `式 B` 必须把关键中间步骤老老实实一步步写出来，**禁止连续两个 `eq` 块之间只夹一句干巴巴的过渡**；推完必须代入 **2~3 个极小具体数字**从头手算验收。
-4. **代码按学习者能力逐函数讲透（零黑盒 API 与语法）**：
-   - 严禁把 `no_grad`、`finally`、`gather`、`clamp`、`[:, :-1]`、`nn.Sequential`、`nn.Linear`、`nn.SiLU`、`optim.Adam`、`randn` vs `rand`、`torch.full`、`~mask` 等函数与工程写法扔进代码块里却只挑两三行敷衍解释；
-   - **必须先查 `learner_profile.json` 的 `coding_level`**：当学习者为 `none` 或 `basic` 时，**代码里出现的每一个自定义函数与每一个非基础库 API/方法**，都必须在代码紧跟的 `□` 分组拆解里讲清“① 它是干嘛的 ② 关键参数是什么含义 ③ 输出什么值/形状”，同时交代删掉或写反关键一行会出什么具体事故；当学习者为 `proficient` 时，也必须讲清该学科/框架特有 API 的约定与隐蔽坑点。
-5. **反事实边界推导（全学科通用）**：
-   - 推演完立刻追问并验算“去掉某项/删掉这行/改掉一个案情事实/改掉一个生理或经济前提，结果会在哪一步立刻崩塌或反转？”。
+Enforce five iron rules across every discipline (see [Human Voice & Logic](./human-voice-and-logic.md) Section 5 for full cross-disciplinary examples):
+1. **Minimal happy path first; guards and exceptions second**: Finish the baseline mechanism first, then ask *"What if something goes wrong halfway?"* to introduce `try/finally`, statutory provisos, differentials, or edge corrections naturally.
+2. **Ban two-step causal leaps & hand-waving phrases**: Expand every `A → B → C`, voice the reader's silent objections, show the naive intuition failing first, and add 1-sentence recaps every 2–3 steps.
+3. **Zero-jump formulas + small-number verification**: Explain the concept behind each `eq` first → `□` symbol-by-symbol unpack → write every key intermediate algebraic step (never consecutive `eq` blocks with a 1-line bridge) + hand-verify with 2–3 tiny numbers.
+4. **Level-matched per-function code breakdown (Zero Black-Box APIs)**:
+   - **Always read `learner_profile.json`'s `coding_level` first**:
+   - When `coding_level` is `none` or `basic`, **every custom function and every non-trivial library API/method called in a code block** (e.g., `manual_seed`, `nn.Sequential`, `nn.Linear`, `nn.SiLU`, `optim.Adam`, `randn` vs. `rand`, `torch.full`, `torch.cat`, boolean mask `~mask`, `with torch.no_grad()`, `try/finally`) **must be explicitly explained in a grouped `□` breakdown** covering **① what it does, ② what its key arguments mean, ③ what value/shape it returns**, plus what breaks if a critical line is deleted or flipped. Never explain only 3 lines and leave 10 APIs mysterious!
+   - When `coding_level` is `proficient`, skip basic syntax (`for`/`print`), but still explain domain/framework-specific APIs and hidden sign/convention traps.
+5. **Counterfactual boundary checks (all disciplines)**: Explicitly verify where and why the result collapses if one term, code line, case fact, physiological assumption, or economic constraint is altered.
 
 ---
 
-## 五、四维广角解释法 & 课中随时答疑四步法
+## 5. Four-Dimensional Coverage, Live Q&A & High-Depth Practical Quizzes
 
-### 1. 每个核心小节覆盖四维广角（拒绝孤立背词典）
-1. **来龙去脉（Why）**：它出现前碰到了什么真实难题？
-2. **直觉、机理与一手硬实操（What + Artifact + Diagram）**：内部因果如何运转？配上该学科真实演练与极简黑白图/动态图；
-3. **横向对比与失效边界（Contrast & Trade-offs）**：和最易混淆的概念差在哪？前提假设与代价是什么？何时失效？
-4. **现实坐标与迁移应用（Reality Check）**：在真实专业场景里怎么落地？最常见误区是什么？
+### 1. Four-Dimensional Section Coverage
+Every core section addresses: **① Why** (real friction before it existed), **② What + Artifact + Diagram** (internal causality + hands-on artifact + static/animated visual), **③ Contrast & Trade-offs** (difference from confusable concepts, cost, failure boundaries), and **④ Reality Check** (real-world application & top pitfalls).
 
-### 2. 课中随时答疑四步法（用户问“没看懂”时严格执行）
-1. **第一句直击因果（严禁同义复读原文）**：立刻换用极小具体数字手算、真实反例或“拿掉它立刻出什么后果”讲破原因；
-2. **禁用模糊敷衍词，给看得见的“变化锚点”**：禁用“大概就是/某种程度上/底层自动处理/更优雅”，说清具体哪一步把什么变成了什么；
-3. **10 秒轻量小反问确认真懂**：结尾问 1 个极轻的边界小问题；
-4. **必要时沉淀回教材**：若卡壳点很关键，把这段白话拆解补回当前章 `chN.json` 并更新 `learner_profile.json`。
+### 2. Four-Step Live Q&A Method (When Learner Asks "I Don't Get It")
+1. **Hit causality in sentence 1 (never paraphrase/repeat the textbook)**: Switch immediately to tiny concrete numbers, a real counterexample, or what breaks without it;
+2. **Ban vague hand-waving**: Never say *"sort of / handled under the hood / more elegant"*—name exactly which step turns what into what;
+3. **10-second verification prompt**: Close with 1 ultra-light boundary check question;
+4. **Fold key blind spots back**: Update `learner_profile.json` and patch `chN.json` if a foundational gap surfaced.
 
-### 3. 全学科高质量实战习题双铁律（100% 知识严密闭环 + 拒绝背概念浅题！）
-练习题的唯一目的是检验读者能不能**拿本章刚学透的原理去解决真实工程/现实理论问题**，必须同时守住两条红线：
-
-1. **红线一：100% 知识严密闭环（零知识缺失、零超纲、零错标 `ref`）**：
-   - 出完每一道单选与简答题后，必须反向逐词核查题目 `q`、四个选项、`answer` 与 `explain` 中出现的**每一个概念、公式、符号、API 名称和推理步骤**——它们必须在本章正文（尤其是 `ref` 指向的那一节）里**白纸黑字讲透**；
-   - 严禁题干或解析里冒出正文从未教过的术语/变量（例如正文写 `sample`，题目却考没解释过的 `latents`），严禁把 `§1.3` 才讲的内容错标成 `ref: "§1.2"`。如果发现好题缺前提，**先补回正文，再出题**！
-2. **红线二：全学科聚焦「工程实践与现实理论诊断」，严禁停留在一般概念背诵水平**：
-   - **彻底禁止**全卷充斥“以下哪项是 XXX 的正确定义？”“请简述 A 与 B 的三个区别”这类死记硬背的概念复述题；
-   - **单选 ≥ 70%、简答 100% 必须是情境实践 / 故障诊断 / 定量推演 / 现实决策题**（全学科通用示范）：
-     - **编程 / AI / 系统**：给一个真实训练异常、报错日志、显存爆炸或指标诡异现象（如 loss 卡在非零下界、生成图糊成灰团、符号写反发散），要求定位根因、手算验证并给出修复代码；
-     - **数学 / 物理 / 工程**：给一个具体数值边界或破坏了某个前提条件的推导片段，要求找出哪一步失效、定量算出误差或新解；
-     - **经济 / 金融 / 会计**：给一个真实政策冲击（限价/加税/加息）或财报数据变动，要求算清缺口/税负归宿并判断资源错配后果；
-     - **医学 / 生物 / 心理**：给一个具体临床病例主诉与化验数值，要求推演病理因果链、判断最优先鉴别诊断及漏检误诊后果；
-     - **法学 / 历史 / 哲学 / 设计**：给一个改动了关键事实（如过错、时间、前提约束或界面反馈）的真实变式案例，要求逐要件推演结论为何逆转。
+### 3. Practical, Grounded Quiz Standards (All Disciplines — Zero Knowledge Gaps, Zero Shallow Rote Recall!)
+1. **100% Strict Knowledge Grounding (Zero Gaps, Zero Wrong `ref`)**:
+   - Audit every word in `q`, all 4 `options`, `answer`, and `explain` against the chapter body—every concept, symbol, variable, and API tested must be explicitly taught in the chapter (and accurately located at `ref`). Never test an unmentioned variable/API (e.g., prose uses `sample`, quiz suddenly asks about unexplained `latents`). If a great question needs a missing premise, **add it to the prose first**!
+2. **Engineering Practice & Real-World Theoretical Depth (Ban Rote Definition Quizzes)**:
+   - Ban shallow recall stems (*"Which of the following defines X?"*, *"List 3 differences between A and B"*);
+   - **≥ 70% of single-choice and 100% of short-answer questions** must be **practical scenarios, fault diagnosis, quantitative calculations, counterfactual debugging, or real-world trade-off decisions**:
+     - **CS / AI / Systems**: Given a real training anomaly, OOM crash, inverted-sign divergence, or architecture choice under business constraints, diagnose root cause, verify numerically, and fix;
+     - **Math / Physics / Engineering**: Given a broken assumption or concrete boundary numbers, pinpoint where a derivation fails or compute the exact value/error;
+     - **Economics / Finance / Accounting**: Given a concrete policy shock or statement change, calculate shortage/tax incidence/margins and explain downstream effects;
+     - **Medicine / Biology / Psychology**: Given concrete patient vitals/labs or altered experimental controls, trace pathophysiology and prioritize fatal differentials;
+     - **Law / History / Philosophy / Design**: Given a perturbed fact pattern, missing historical constraint, or altered UI feedback, deduce step-by-step why the holding or outcome flips.
 
 ---
 
-## 六、交付前编辑审稿清单（全学科通用）
+## 6. Pre-Delivery Editorial Checklist (All Disciplines)
 
-- [ ] **Z-Lib 顺读体检**：默读每一段——有没有播客卖关子废话？有没有单段超过 1 个破折号 `——`？有没有 36 字以上括号套娃？有没有在段落里口播代码/公式？有没有搬一堆博主语录充门面？
-- [ ] **因果拉链体检**：上一节末尾的边界或疑问，是不是自然衔接到下一节第一句？有没有没铺垫卡点就凭空掉出来的新概念？
-- [ ] **每章硬实践与逐函数拆解体检（全学科）**：本章是不是有 **≥ 2 处该学科真实的一手硬实操载体**？代码章是否依据 `learner_profile.json` 把代码块里出现的**每一个非基础函数/库 API** 与 **每一处打印输出中文标签（如“左簇均值”）** 都讲透了用途与参数？
-- [ ] **反防御性编书与零跳步体检（全学科）**：圈出每个缩写、每个中文组合词、每个举例数字和每段推导——有没有还没走通主干就塞防御性补丁？有没有跨步跳推导？不点任何弹窗，零背景读者能不能一口气读通？
-- [ ] **习题闭环与实战深度体检**：逐题核对 `q / options / answer / explain` 里的每一个知识点是不是都在 `ref` 对应正文里讲透了（零知识缺失）？单选与简答是不是以工程实践、现实理论诊断、定量推演和反事实改错为主，而不是停留在背概念定义？
-- [ ] **防叠字与篇幅体检**：正文有没有误写 `WORD{{term:WORD|...}}`？每段是否 90~220 字、超 600 字小节是否用 `h4` 分层？
+- [ ] **Smooth-Read Check**: Any podcast cliffhangers, > 1 em-dash per paragraph, > 36-char parenthetical nesting, inline code recitations, or name-dropped blog quotes?
+- [ ] **Causal Zipper Check**: Does each section open by catching the previous section's open boundary? Any concept appearing without prior need?
+- [ ] **Hands-On & Per-API Breakdown Check**: ≥ 2 real hands-on artifacts? Matched to `learner_profile.json`, is every non-trivial function/API called in code and every printed output label explained clearly?
+- [ ] **Anti-Defensive & Concept-Budget Check**: ≤ 3 new core concepts per section? Zero naked acronyms, coined phrases, or forward references? Zero skipped formula/causal leaps?
+- [ ] **Quiz Grounding & Depth Check**: Is every single tested term/identifier explicitly taught at `ref` (zero knowledge gaps)? Are ≥ 70% of MCQs and 100% of short-answers real engineering/domain diagnostic or quantitative problems rather than definition recall?

@@ -1,87 +1,87 @@
-# 全书大局观与四阶精通型大纲设计规范（从零基础到老手）
+# Book Architecture & 4-Stage Mastery Syllabus Design (Zero-to-Practitioner)
 
-> 一本好书和“四篇博客拼盘”的分水岭，在于**大局架构**：真正能把新手带到老手/精通水平的 Z-Lib 经典教材，绝不是 3~4 章走马观花，而是按认知阶梯把 **地基 → 核心机理逐层演化 → 评测排障与工程深水区 → 端到端综合大实战** 严丝合缝地搭成一条爬坡路。
-
----
-
-## 一、全书规模与「四阶精通爬坡架构」
-
-除非用户明确要求“速览/迷你小课”，凡目标是系统掌握或达到实战老手水平的完整教材，**全书大纲必须按学科知识体量面面俱到地规划为 8~20 章（上限最多 20 章）、划分为 4 个递进篇**，且**每章 4~6 节、每节递进加深**：
-
-### 第一篇 · 奠基与最小闭环（前 1~3 章：新手入场 → 跑通第一个真实闭环）
-- **职责**：彻底补齐后面所有章节依赖的基础地基，并带着读者在入门阶段就跑通/手算出第一个完整的最小闭环，建立全局坐标系。
-- **严禁跳步**：不能假设读者懂核心底层量（例如讲大模型后训练前，必须先讲清预训练下一词预测、token 概率、交叉熵损失与数据格式；讲微观经济学前，必须先讲清稀缺性、边际思维与机会成本核算）。
-
-### 第二篇 · 核心机理逐层演进（中间 4~10 章：一章解决一个核心瓶颈，面面俱到不漏关键分支）
-- **职责**：按历史或工程因果演进，把该领域全部核心模块与关键演进脉络一章接一章往深处讲透。**上一章结尾暴露出来的天花板或致命缺陷，就是下一章存在的唯一理由。**
-- **严禁跳脱**：绝不能第 2 章刚讲完概念，第 3 章突然跳去讲最新论文变体，把中间承上启下的关键环节一笔略过。
-
-### 第三篇 · 深水区：评测、诊断、排障与权衡（后续 2~4 章：新手变老手的分水岭）
-- **职责**：AI 写大纲最容易漏掉的一整篇，却是实战老手最值钱的能力：
-  1. **如何客观评测与验收**（评测集构造、对照组、核心指标与防泄露）；
-  2. **常见翻车与系统排障**（典型崩溃日志、数据污染、指标作弊、模型误诊或法律竞合陷阱的排查树）；
-  3. **真实约束下的架构权衡与调优**（成本、算力、吞吐、延迟、风险之间的工程取舍）。
-
-### 第四篇 · 端到端综合实战与精通迁移（最后 1~3 章：把全书部件串成真项目）
-- **职责**：不再孤立演示单个小函数或单个小例子，而是把前面所有章节的部件串成一条**完整的生产级流水线或综合大案例**（从原始需求/数据 → 方案选型 → 完整搭建 → 评测诊断 → 迭代调优 → 复盘迁移），让读者合上书能独立干活。
+> What separates a genuine textbook from a "4-blog-post collage" is **book-level architecture**. A classic textbook that takes a beginner to seasoned practitioner mastery never skims through 3–4 thin chapters; it constructs a seamless cognitive staircase: **Foundations → Layered Mechanism Evolution → Evaluation, Debugging & Deep Trade-offs → End-to-End Capstone**.
 
 ---
 
-## 二、大纲数据契约：每章必须带「因果桥」与「硬产出」
+## 1. Book Scale & The 4-Stage Mastery Arc
 
-在 `course.json` 的 `syllabus` 数组中，每一章除 `num`、`title`、`sections`（4~6 节）外，**必须写清四个大局观字段**：
+Unless the user explicitly requests a quick crash course, any full textbook aiming for systematic mastery **must plan 8–20 chapters (hard ceiling: 20 chapters)** scaled comprehensively to the subject's breadth, structured into **4 progressive parts**, with **4–6 progressively deeper sections per chapter**:
+
+### Part I · Foundations & Minimal Closed Loop (First 1–3 Chapters: Entry → First Real Loop)
+- **Role**: Solidify every prerequisite relied upon by later chapters and guide the learner through completing/hand-calculating their first end-to-end minimal loop early to establish a global coordinate system.
+- **Zero hidden prerequisites**: Never assume mastery of core underlying quantities (e.g., before teaching LLM post-training, explain next-token prediction, token probabilities, cross-entropy loss, and chat data formats; before teaching microeconomics, establish scarcity, marginal thinking, and opportunity cost accounting).
+
+### Part II · Layered Core Mechanism Evolution (Middle 4–10 Chapters: One Bottleneck per Chapter, Thorough Branch Coverage)
+- **Role**: Advance chapter by chapter along historical or engineering causality, covering every core pillar and major branch thoroughly. **The ceiling or fatal flaw exposed at the end of Chapter `k` is the sole reason Chapter `k+1` exists.**
+- **Zero generational leaps**: Never jump straight from basic concepts in Chapter 2 to cutting-edge variants in Chapter 3 while skipping the connecting middle layers.
+
+### Part III · Deep Water: Evaluation, Diagnosis, Debugging & Trade-offs (Next 2–4 Chapters: Beginner → Seasoned Practitioner)
+- **Role**: The entire part AI syllabi usually omit—yet the most valuable skill set in real practice:
+  1. **Objective evaluation & verification** (benchmark design, control baselines, core metrics, leakage prevention);
+  2. **Systematic failure diagnosis & troubleshooting** (real crash logs, data contamination, reward hacking, clinical misdiagnosis traps, or legal concurrence decision trees);
+  3. **Real-world constraint trade-offs & tuning** (balancing cost, compute, throughput, latency, memory, or risk).
+
+### Part IV · End-to-End Capstone & Mastery Transfer (Final 1–3 Chapters: Assemble Everything Into Real Work)
+- **Role**: Stop showing isolated helper functions or toy snippets. Wire every building block from earlier chapters into a **complete production pipeline or full real-world case** (raw problem/data → design selection → full build → evaluation & diagnosis → iterative tuning → transfer review) so the reader can execute independently after closing the book.
+
+---
+
+## 2. Syllabus Data Contract: Mandatory Causal Bridges & Concrete Deliverables
+
+In `course.json`'s `syllabus` array, beyond `num`, `title`, and `sections` (4–6 sections), **every chapter must include four architectural fields**:
 
 ```json
 {
   "num": 3,
-  "part": "第二篇 · 核心机理逐层演进",
-  "title": "奖励模型（RM）：把人类偏好翻译成可计算的标量信号",
-  "prerequisite": "第 2 章 SFT 模型输出与交叉熵损失",
-  "bridgeToNext": "有了能打分的 RM 后，如何用这个打分反过来更新策略模型、同时不让模型钻打分空子？下一章进入 PPO 与 KL 约束。",
-  "capstoneDeliverable": "手写 Bradley-Terry 偏好损失函数并在 100 条偏好对上跑通 RM 打分与准确率评测",
+  "part": "Part II · Core Mechanism Evolution",
+  "title": "Reward Models (RM): Turning Human Preference into a Computable Scalar",
+  "prerequisite": "Chapter 2 SFT model outputs and cross-entropy loss",
+  "bridgeToNext": "Once an RM can score answers, how do we update the policy using those scores without letting the model hack the scorer? Next chapter introduces PPO and KL constraints.",
+  "capstoneDeliverable": "Implement Bradley-Terry pairwise loss from scratch and evaluate RM scoring accuracy on 100 preference pairs",
   "sections": [
-    "3.1 为什么 SFT 碰到了天花板：模仿标准答案的盲区",
-    "3.2 奖励模型的网络改造：去掉词表头换成单输出线性层",
-    "3.3 Bradley-Terry 成对损失推导与小数字手算",
-    "3.4 偏好数据构造、标注一致性与常见偏置（长度偏置/格式偏置）",
-    "3.5 实操：训练最小 RM 并验证好答/差答分差与平移不变性"
+    "3.1 Where SFT Hits a Wall: The Blind Spots of Imitating One Gold Answer",
+    "3.2 Reward Model Architecture: Replacing the Vocab Head with a Scalar Projection",
+    "3.3 Bradley-Terry Pairwise Loss Derivation & Small-Number Hand Check",
+    "3.4 Preference Data Construction, Annotator Agreement & Bias (Length / Format)",
+    "3.5 Practice: Train a Minimal RM and Verify Score Margin & Shift Invariance"
   ]
 }
 ```
 
-### 大纲大局观 5 条硬自检
-1. **章节数硬门槛**：完整精通型教材必须 **8~20 章（按知识体系完整度铺开，上限最多 20 章）**；仅速览课允许 4~6 章，且须在 `course.json` 标注 `"scope": "quick"`；
-2. **不可互换检验**：随机抽相邻两章，如果互换顺序后竟然还能讲通，说明它们只是平铺清单，没有循序渐进的依赖链，必须重排；
-3. **桥接闭合检验**：第 `k` 章的 `bridgeToNext` 必须准确咬住第 `k+1` 章的 `title`/`prerequisite`，杜绝跨代跳跃；
-4. **时代前沿检验**：立大纲前必须先查当前年份的主流演进与废弃清单——第二、三、四篇必须以**当下最新主流标准/架构/工具/法规/指南**为主线，禁止把两三年前已淘汰的旧库或旧范式当主角；
-5. **单章厚度标准**：每章 **4~6 节**，正文（不含代码/图表）建议 **2,500~5,500 字**，并配齐 **≥ 2 处一手硬实操** 与 **≥ 2 张图/动态图**，彻底告别几百字一章的薄讲义。
+### 5 Hard Self-Checks Before Approving Any Syllabus
+1. **Chapter-count gate**: Full mastery textbooks must have **8–20 chapters (hard ceiling: 20)**; only explicit crash courses may use 4–6 chapters and must set `"scope": "quick"` in `course.json`;
+2. **Non-swappability test**: Pick any two adjacent chapters—if swapping their order still makes sense, they are a flat list rather than a dependency chain and must be re-sequenced;
+3. **Bridge closure check**: Chapter `k`'s `bridgeToNext` must lock directly into Chapter `k+1`'s `title`/`prerequisite` with zero missing links;
+4. **Current-era check**: Verify current-year mainstream standards and deprecations first—Parts II–IV must center on **today's mainstream architectures, libraries, statutes, or clinical guidelines**, never obsolete tools from years ago;
+5. **Single-chapter substance**: Each chapter must contain **4–6 sections**, rich exposition (~2,500–5,500 CJK chars or ~1,800–4,000 English words excluding code/diagrams), **≥ 2 hands-on artifacts**, and **≥ 2 diagrams/animations**—never thin pamphlets.
 
 ---
 
-## 三、正反大纲对照（一眼看懂“4 章拼盘”与“10 章精通”的差距）
+## 3. Bad vs. Good Syllabus Contrast
 
-### ❌ 反面教材（4 章拼盘：单薄、跳脱、无地基、无排障、无大项目）
-- 第 1 章 后训练全景 → 第 2 章 DPO 推导 → 第 3 章 RLVR → 第 4 章 Agent
-- **致命问题**：新手根本不知道 SFT 数据掩码怎么算、RM 怎么训练、KL 为什么拦得住作弊、显存怎么省、评测怎么防污染、最后怎么从零跑完一条端到端训练流水线。
+### ❌ Bad Example (4-Chapter Collage: Thin, Disjointed, No Foundations, No Debugging, No Capstone)
+- Ch. 1 Post-Training Overview → Ch. 2 DPO Math → Ch. 3 RLVR → Ch. 4 Agents
+- **Fatal flaws**: Beginners have no idea how SFT loss masking works, how reward models are trained, why KL stops reward hacking, how memory is saved, how benchmarks avoid contamination, or how to run an end-to-end training pipeline.
 
-### ✅ 正面范本 A · AI 工程类：《大模型后训练实战：从零基础到工业级对齐》（10 章 · 四阶）
-- **第一篇 · 奠基与最小闭环**
-  - 第 1 章 预训练的边界与后训练全景：为什么基座模型会续写却不会对话
-  - 第 2 章 监督微调（SFT）底层机制：对话模板、Loss Mask 与数据配比实战
-- **第二篇 · 核心机理逐层演进**
-  - 第 3 章 SFT 的天花板与奖励模型（RM）：网络改造、Bradley-Terry 损失与打分实操
-  - 第 4 章 经典 RLHF 与 PPO：策略梯度、KL 约束与奖励黑客（Reward Hacking）机理
-  - 第 5 章 直接偏好优化（DPO）家族：从闭式解消去 RM 到 IPO / SimPO / ORPO 演进
-  - 第 6 章 可验证奖励强化学习（GRPO / RLVR）：无 Critic 组内相对优势与长思维链涌现
-- **第三篇 · 深水区：评测、排障与算力工程**
-  - 第 7 章 后训练数据工程：合成数据、去重清洗、难例挖掘与分布平衡
-  - 第 8 章 对齐评测与翻车诊断：基准防污染、模型裁判偏差、模式坍塌排查手册
-  - 第 9 章 显存与效率工程：LoRA / QLoRA、梯度检查点与单卡到多卡并行取舍
-- **第四篇 · 端到端综合实战**
-  - 第 10 章 综合项目：从零打造垂直领域推理模型（SFT → DPO/GRPO → 评测验收全流水线）
+### ✅ Good Example A · AI Engineering: *LLM Post-Training in Practice: From Foundations to Production Alignment* (10 Chapters · 4 Stages)
+- **Part I · Foundations & Minimal Loop**:
+  - Ch. 1 Boundaries of Pretraining & Post-Training Map: Why Base Models Complete Text Instead of Chatting
+  - Ch. 2 Supervised Fine-Tuning (SFT) Internals: Chat Templates, Loss Masking & Data Mixing
+- **Part II · Core Mechanism Evolution**:
+  - Ch. 3 Ceilings of SFT & Reward Models (RM): Head Modification, Bradley-Terry Loss & Scoring Lab
+  - Ch. 4 Classic RLHF & PPO: Policy Gradients, KL Constraints & Reward Hacking Mechanisms
+  - Ch. 5 Direct Preference Optimization (DPO) Family: Closed-Form RM Elimination to IPO / SimPO / ORPO
+  - Ch. 6 Verifiable-Reward RL (GRPO / RLVR): Critic-Free Group Relative Advantage & Long Chain-of-Thought Emergence
+- **Part III · Deep Water: Evaluation, Debugging & Efficiency**:
+  - Ch. 7 Post-Training Data Engineering: Synthetic Data, Deduplication, Hard-Negative Mining & Distribution Balance
+  - Ch. 8 Alignment Evaluation & Failure Diagnosis: Contamination Checks, Judge Bias & Collapse Troubleshooting Playbook
+  - Ch. 9 Memory & Compute Engineering: LoRA / QLoRA, Gradient Checkpointing & Single-to-Multi-GPU Trade-offs
+- **Part IV · End-to-End Capstone**:
+  - Ch. 10 Capstone Project: Build a Domain Reasoning Model End-to-End (SFT → DPO/GRPO → Eval Pipeline)
 
-### ✅ 正面范本 B · 非代码学科（经济学为例，10 章 · 四阶）
-- **第一篇 · 奠基与直觉**：第 1 章 稀缺、机会成本与边际决策核算 → 第 2 章 供给、需求与市场出清账表
-- **第二篇 · 核心机理演进**：第 3 章 弹性与价格冲击量化 → 第 4 章 价格管制、税收归宿与无谓损失 → 第 5 章 外部性、公共品与市场失灵 → 第 6 章 企业成本结构与四类市场竞争博弈
-- **第三篇 · 宏观深水与政策诊断**：第 7 章 GDP、通胀与失业统计口径及误区 → 第 8 章 央行货币政策与利率传导链条 → 第 9 章 财政乘数、汇率与开放经济危机复盘
-- **第四篇 · 综合实证分析**：第 10 章 综合研判：用真实宏观与行业数据完成一份完整政策影响评估报告
+### ✅ Good Example B · Non-Coding Discipline (Economics, 10 Chapters · 4 Stages)
+- **Part I · Foundations & Intuition**: Ch. 1 Scarcity, Opportunity Cost & Marginal Accounting → Ch. 2 Supply, Demand & Market-Clearing Schedules
+- **Part II · Core Mechanism Evolution**: Ch. 3 Elasticity & Price Shock Quantification → Ch. 4 Price Controls, Tax Incidence & Deadweight Loss → Ch. 5 Externalities, Public Goods & Market Failure → Ch. 6 Firm Cost Curves & Four Market Structures
+- **Part III · Macro Deep Water & Policy Diagnosis**: Ch. 7 GDP, Inflation & Unemployment Measurement Pitfalls → Ch. 8 Central Bank Policy & Interest-Rate Transmission Chains → Ch. 9 Fiscal Multipliers, Exchange Rates & Open-Economy Crises
+- **Part IV · Empirical Capstone**: Ch. 10 Capstone Analysis: Author a Full Empirical Policy-Impact Report from Real Macro & Sector Data
