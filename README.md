@@ -2,6 +2,10 @@
   <img src="assets/banner.svg" width="100%" alt="day-up" />
 </p>
 
+<p align="center">
+  <strong>简体中文</strong> · <a href="./README.en.md">English</a>
+</p>
+
 # day-up
 
 把任意想学的主题，一步步生成为纸书排版的本地交互式教材，并收进统一书架的 Agent Skill。
