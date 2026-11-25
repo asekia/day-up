@@ -943,12 +943,12 @@ def serverStateFile() -> Path:
 
 
 def probeLibraryHealth(host: str, port: int):
-    """探测指定端口是否已有 Day-Up 统一书库在运行，返回其健康 JSON 或 None。"""
+    """探测指定端口是否已有 Day-Up 统一书库在运行（绕过本机代理），返回健康 JSON 或 None。"""
     try:
-        req = urllib.request.Request(f"http://{host}:{port}/api/library/health", method="GET")
-        with urllib.request.urlopen(req, timeout=1.5) as resp:
+        opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+        with opener.open(f"http://{host}:{port}/api/library/health", timeout=1.5) as resp:
             data = json.loads(resp.read().decode("utf-8", errors="ignore"))
-            return data if data.get("ok") and data.get("mode") == "library" else None
+            return data if data.get("ok") and data.get("service") == "day-up-library" else None
     except Exception:
         return None
 
@@ -967,11 +967,11 @@ def readSavedPort():
 def findRunningBookshelf(host: str, reqPort: int):
     """优先复用已运行的固定书库实例（查 server.json 与 18770），防止新会话另开端口。"""
     savedPort = readSavedPort()
-    ports = [p for p in (savedPort, reqPort, 18770) if p]
+    ports = [p for p in (18770, savedPort, reqPort) if p]
     for p in dict.fromkeys(ports):
         health = probeLibraryHealth(host, p)
         if health:
-            return p, Path(str(health.get("library") or default_library_dir())).resolve()
+            return p, Path(str(health.get("library_dir") or default_library_dir())).resolve()
     return None, None
 
 
