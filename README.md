@@ -17,6 +17,14 @@
 - **纸书阅读与划词伴学**：生成零外部依赖的单文件网页，支持连贯滚读 / 仿真翻页切换、三色护眼主题，不懂的句子直接划选即可向当前 Agent 追问。
 - **单端口个人书架**：所有生成的教材统一归入 `~/.day-up/library/`，在同一个本地书架集中浏览、打标签、搜索与追踪学习进度。
 
+## 界面预览
+
+| 单端口个人书架 | 纸书连贯阅读与逐行推导 |
+| :---: | :---: |
+| ![单端口个人书架](docs/screenshots/zh-bookshelf.png) | ![纸书连贯阅读与逐行推导](docs/screenshots/zh-scroll.png) |
+| **仿真翻页 · 原理图 · 词条弹窗与右侧伴学** | **护眼模式 · 内置交互实验** |
+| ![仿真翻页与右侧伴学](docs/screenshots/zh-paged-tutor.png) | ![内置交互实验](docs/screenshots/zh-interactive.png) |
+
 ## 安装
 
 使用 `skills` CLI 一键安装（支持 Claude Code、Codex、Cursor、Gemini CLI、OpenCode、dsh、zcode 等）：

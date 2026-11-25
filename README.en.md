@@ -17,6 +17,14 @@ An Agent Skill that turns any topic into a progressive, print-inspired local int
 - **Calm book layout & inline Agent tutoring**: Compiles to a zero-dependency standalone HTML file with continuous scroll / paged reading modes, light/sepia/dark themes, and click-or-highlight follow-up questions routed to your active Agent.
 - **Single-port personal library**: Stores all generated books under `~/.day-up/library/` and serves them together on one local bookshelf for searching, tagging, bookmarking, and tracking mastery progress.
 
+## Preview
+
+| Single-Port Personal Library | Print-Style Scroll Reader & Derivations |
+| :---: | :---: |
+| ![Personal Library](docs/screenshots/en-bookshelf.png) | ![Scroll Reader](docs/screenshots/en-scroll.png) |
+| **Paged Mode · Glossary Popover · Companion Agent** | **Sepia Theme · Interactive Formula Lab** |
+| ![Paged Mode and Companion Agent](docs/screenshots/en-paged-tutor.png) | ![Interactive Formula Lab](docs/screenshots/en-interactive.png) |
+
 ## Installation
 
 Install globally in one command with the `skills` CLI (supports Claude Code, Codex, Cursor, Gemini CLI, OpenCode, dsh, zcode, and more):
