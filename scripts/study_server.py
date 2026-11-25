@@ -938,14 +938,71 @@ def make_handler(mode: str, root_dir: Path, active_cli):
     return StudyHandler
 
 
+def serverStateFile() -> Path:
+    return (Path.home() / ".day-up" / "server.json").resolve()
+
+
+def probeLibraryHealth(host: str, port: int):
+    """探测指定端口是否已有 Day-Up 统一书库在运行，返回其健康 JSON 或 None。"""
+    try:
+        req = urllib.request.Request(f"http://{host}:{port}/api/library/health", method="GET")
+        with urllib.request.urlopen(req, timeout=1.5) as resp:
+            data = json.loads(resp.read().decode("utf-8", errors="ignore"))
+            return data if data.get("ok") and data.get("mode") == "library" else None
+    except Exception:
+        return None
+
+
+def readSavedPort():
+    sf = serverStateFile()
+    if not sf.exists():
+        return None
+    try:
+        saved = json.loads(sf.read_text(encoding="utf-8"))
+        return saved.get("port") if isinstance(saved.get("port"), int) else None
+    except Exception:
+        return None
+
+
+def findRunningBookshelf(host: str, reqPort: int):
+    """优先复用已运行的固定书库实例（查 server.json 与 18770），防止新会话另开端口。"""
+    savedPort = readSavedPort()
+    ports = [p for p in (savedPort, reqPort, 18770) if p]
+    for p in dict.fromkeys(ports):
+        health = probeLibraryHealth(host, p)
+        if health:
+            return p, Path(str(health.get("library") or default_library_dir())).resolve()
+    return None, None
+
+
+def saveServerState(host: str, port: int, libDir: Path):
+    sf = serverStateFile()
+    sf.parent.mkdir(parents=True, exist_ok=True)
+    payload = {"host": host, "port": port, "library": str(libDir), "url": f"http://{host}:{port}/"}
+    sf.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def mountBooksIntoLibrary(srcDir: Path, targetLib: Path, slug: str = "") -> str:
+    """将单书目录或外部书库中的所有教材统一挂载进固定书库，避免多窗口分裂。"""
+    src = srcDir.expanduser().resolve()
+    if (src / "index.html").is_file() or (src / "data").is_dir():
+        return register_book_in_library(targetLib, src, slug)
+    lastSlug = ""
+    for child in sorted(src.iterdir()):
+        if child.is_dir() and (child / "index.html").is_file():
+            lastSlug = register_book_in_library(targetLib, child, "")
+    return lastSlug
+
+
 def main():
-    parser = argparse.ArgumentParser(description="Day-Up 本地统一书库与伴学服务（单端口管理全部教材）")
-    parser.add_argument("--library", default="", help="统一书库根目录（默认 ~/.day-up/library，推荐单端口管理全部教材）")
-    parser.add_argument("--dir", default="", help="兼容参数：单本教材目录（不传时默认启用统一书库模式）")
+    parser = argparse.ArgumentParser(description="Day-Up 本地统一书库与伴学服务（固定目录 + 单端口管理全部教材）")
+    parser.add_argument("--library", default="", help="统一书库根目录（默认固定为 ~/.day-up/library）")
+    parser.add_argument("--dir", default="", help="已有单本教材目录：自动挂载进固定统一书库并复用同一端口")
     parser.add_argument("--add", default="", help="将任意路径的已有教材目录挂载到统一书库（无需移动文件）")
-    parser.add_argument("--slug", default="", help="配合 --add 使用的书目短名")
+    parser.add_argument("--slug", default="", help="配合 --add / --dir 使用的书目短名")
     parser.add_argument("--host", default="127.0.0.1", help="监听地址，默认 127.0.0.1")
-    parser.add_argument("--port", type=int, default=18770, help="监听端口，默认 18770（统一书库固定复用同一端口）")
+    parser.add_argument("--port", type=int, default=18770, help="固定书库端口，默认 18770（所有会话统一复用）")
+    parser.add_argument("--isolated", action="store_true", help="仅测试用：强制按 --library 与 --port 独立启动而不复用全局书库")
     parser.add_argument(
         "--agent-cmd",
         default=os.environ.get("DAYUP_AGENT_CMD", ""),
@@ -953,44 +1010,27 @@ def main():
     )
     args = parser.parse_args()
 
-    # 若显式传 --dir 且未传 --library/--add，走单书向后兼容模式
-    if args.dir and not args.library and not args.add:
-        serve_dir = Path(args.dir).expanduser().resolve()
-        if not serve_dir.exists():
-            raise SystemExit(f"目录不存在：{serve_dir}")
-        active_cli = resolve_current_agent(serve_dir, args.agent_cmd.strip())
-        server = ThreadingHTTPServer((args.host, args.port), make_handler("single", serve_dir, active_cli))
-        print(f"Day-Up 单书服务：http://{args.host}:{args.port}/", flush=True)
-        if active_cli:
-            print(f"右侧伴学已连接当前 Agent（{active_cli['name']}）", flush=True)
-        else:
-            print("右侧伴学已连接当前 Agent（对话桥接：agent_chat.json）", flush=True)
-        try:
-            server.serve_forever()
-        except KeyboardInterrupt:
-            pass
-        finally:
-            server.server_close()
-        return
-
-    # 统一书库模式（默认）
-    library_dir = Path(args.library).expanduser().resolve() if args.library else default_library_dir()
+    # 统一书库根目录默认严格固定为 ~/.day-up/library；新会话传 --dir 或 --library 时自动并入运行中的固定书库
+    runningPort, runningLib = (None, None) if args.isolated else findRunningBookshelf(args.host, args.port)
+    library_dir = runningLib or (Path(args.library).expanduser().resolve() if args.library else default_library_dir())
     library_dir.mkdir(parents=True, exist_ok=True)
 
-    added_slug = ""
-    if args.add:
-        added_slug = register_book_in_library(library_dir, Path(args.add), args.slug)
-        print(f"已挂载教材到统一书库：{added_slug} -> http://{args.host}:{args.port}/books/{added_slug}/", flush=True)
+    mountTarget = args.add or args.dir or (args.library if runningLib and Path(args.library).expanduser().resolve() != runningLib else "")
+    added_slug = mountBooksIntoLibrary(Path(mountTarget), library_dir, args.slug) if mountTarget else ""
+    if added_slug:
+        portShow = runningPort or args.port
+        print(f"已纳入固定统一书库：{added_slug} -> http://{args.host}:{portShow}/books/{added_slug}/", flush=True)
 
-    # 幂等复用：如果同一书库已在目标端口运行，直接提示并退出，不再新开端口！
-    if _check_existing_library_server(args.host, args.port, library_dir):
-        print(f"Day-Up 统一书库已在运行：http://{args.host}:{args.port}/（无需新开端口，刷新书架即可见新书）", flush=True)
+    if runningPort is not None:
+        print(f"Day-Up 固定统一书库已在运行：http://{args.host}:{runningPort}/（所有会话共用同一窗口，刷新书架即可见新书）", flush=True)
         return
 
     active_cli = resolve_current_agent(library_dir, args.agent_cmd.strip())
     server = ThreadingHTTPServer((args.host, args.port), make_handler("library", library_dir, active_cli))
+    if not args.isolated:
+        saveServerState(args.host, args.port, library_dir)
     books, _ = discover_books(library_dir)
-    print(f"Day-Up 统一书库已启动：http://{args.host}:{args.port}/（目录：{library_dir}，共 {len(books)} 本教材）", flush=True)
+    print(f"Day-Up 固定统一书库已启动：http://{args.host}:{args.port}/（固定目录：{library_dir}，共 {len(books)} 本教材）", flush=True)
     if active_cli:
         print(f"右侧伴学已连接当前 Agent（{active_cli['name']}）", flush=True)
     else:

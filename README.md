@@ -3,58 +3,58 @@
 </p>
 
 <p align="center">
-  <strong>简体中文</strong> · <a href="./README.en.md">English</a>
+  <strong>English</strong> · <a href="./README.zh-CN.md">简体中文</a>
 </p>
 
 # day-up
 
-把任意想学的主题，一步步生成为纸书排版的本地交互式教材，并收进统一书架的 Agent Skill。
+An Agent Skill that turns any topic into a progressive, print-inspired local interactive textbook and organizes every course on a single local bookshelf.
 
-## 效果
+## What it does
 
-- **按书立纲、逐章解锁**：开课前简短了解你的基础，联网核实近期资料后规划完整全书大纲（8~20 章），每次只写透当前一章，读完自测后再解锁下一章。
-- **人话推演、拒绝跳步**：从具体场景一步步推到概念、公式与实操，限制单节新概念数量，配齐动静态原理图、悬停词条与课后练习。
-- **纸书阅读与划词伴学**：生成零外部依赖的单文件网页，支持连贯滚读 / 仿真翻页切换、三色护眼主题，不懂的句子直接划选即可向当前 Agent 追问。
-- **单端口个人书架**：所有生成的教材统一归入 `~/.day-up/library/`，在同一个本地书架集中浏览、打标签、搜索与追踪学习进度。
+- **Book-level syllabus, unlocked chapter by chapter**: Profiles your background first, verifies up-to-date references online, plans a complete syllabus (8–20 chapters), and writes one focused chapter at a time—unlocking the next after you review and take the quiz.
+- **Step-by-step reasoning, zero skipped logic**: Builds from concrete situations to concepts, line-by-line derivations, and hands-on artifacts, enforcing a strict per-section concept budget with static/animated diagrams, hover glossaries, and closed-loop exercises.
+- **Calm book layout & inline Agent tutoring**: Compiles to a zero-dependency standalone HTML file with continuous scroll / paged reading modes, light/sepia/dark themes, and click-or-highlight follow-up questions routed to your active Agent.
+- **Single-port personal library**: Stores all generated books under `~/.day-up/library/` and serves them together on one local bookshelf for searching, tagging, bookmarking, and tracking mastery progress.
 
-## 界面预览
+## Preview
 
-| 单端口个人书架 | 纸书连贯阅读与逐行推导 |
+| Single-Port Personal Library | Print-Style Scroll Reader & Derivations |
 | :---: | :---: |
-| ![单端口个人书架](docs/screenshots/zh-bookshelf.png) | ![纸书连贯阅读与逐行推导](docs/screenshots/zh-scroll.png) |
-| **仿真翻页 · 原理图 · 词条弹窗与右侧伴学** | **护眼模式 · 内置交互实验** |
-| ![仿真翻页与右侧伴学](docs/screenshots/zh-paged-tutor.png) | ![内置交互实验](docs/screenshots/zh-interactive.png) |
+| ![Personal Library](docs/screenshots/en-bookshelf.png) | ![Scroll Reader](docs/screenshots/en-scroll.png) |
+| **Paged Mode · Glossary Popover · Companion Agent** | **Sepia Theme · Interactive Formula Lab** |
+| ![Paged Mode and Companion Agent](docs/screenshots/en-paged-tutor.png) | ![Interactive Formula Lab](docs/screenshots/en-interactive.png) |
 
-## 安装
+## Installation
 
-使用 `skills` CLI 一键安装（支持 Claude Code、Codex、Cursor、Gemini CLI、OpenCode、dsh、zcode 等）：
+Install globally in one command with the `skills` CLI (supports Claude Code, Codex, Cursor, Gemini CLI, OpenCode, dsh, zcode, and more):
 
 ```bash
 npx skills add asekia/day-up -g
 ```
 
-或者手动克隆到对应 Agent 的 `skills` 目录：
+Or clone directly into your Agent's `skills` directory:
 
 ```bash
 git clone https://github.com/asekia/day-up.git ~/.claude/skills/day-up
 ```
 
-> 运行仅依赖系统自带 `Python 3.8+`，无需额外安装第三方库。
+> Requires only `Python 3.8+` standard library—no third-party packages needed.
 
-## 使用
+## Usage
 
-安装后直接在对话里告诉 Agent 你想学什么即可（或输入 `/day-up` 触发）：
+After installation, simply ask your Agent what you want to learn (or trigger `/day-up`):
 
 ```text
-用 day-up 手把手教我微观经济学，从零基础讲到能看懂现实政策分析
+Use day-up to teach me microeconomics from scratch until I can analyze real policy impacts.
 ```
 
 ```text
-用 day-up 出一本 Flow Matching 与现代图像生成实战教材
+Use day-up to create a hands-on interactive textbook on Flow Matching and modern image generation.
 ```
 
 ```text
-第 1 章读完了，先解答我标疑问的小节，再继续解锁第 2 章
+I finished Chapter 1—please address the doubts I marked and then unlock Chapter 2.
 ```
 
 ## License

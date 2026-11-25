@@ -602,6 +602,10 @@ def validate_chapter(ch, source_name="<input>"):
     warnings.extend(checkConceptBudget(sections, label))
     warnings.extend(checkForwardRefTerms(sections, label))
     warnings.extend(checkNakedLatinTerms(sections, label))
+    warnings.extend(checkCodeApiCoverage(sections, label))
+    warnings.extend(checkCodeOutputTerms(sections, label))
+    warnings.extend(checkQuizGrounding(ch, sections, label))
+    warnings.extend(checkQuizDepth(ch, label))
     return errors, warnings
 
 
@@ -765,6 +769,105 @@ def checkNakedLatinTerms(sections, label):
             clean = stripProseForLatin(raw)
             warns.extend(scanBlockLatin(clean, prev + "\n" + clean, known, secNum, label))
             prev = clean
+    return warns
+
+
+TRIVIAL_CODE_APIS = {
+    "print", "range", "len", "int", "float", "str", "list", "dict", "set",
+    "append", "items", "keys", "values", "get", "join", "split", "strip",
+    "format", "tolist", "size", "shape", "item", "mean", "sum", "round",
+}
+PRACTICAL_QUIZ_CUES = (
+    "如果", "假如", "删掉", "写反", "改", "报错", "异常", "故障", "崩溃",
+    "排障", "诊断", "方案", "选型", "场景", "实验", "算", "代入", "验证",
+    "微调", "线上", "病例", "案情", "政策", "成本", "为什么", "为何",
+)
+SHALLOW_QUIZ_RE = re.compile(r"(?:以下哪项是.{1,16}的定义|什么是.{1,14}[？?]|请简述.{1,20}(?:区别|特点|概念|定义)|是指[（(])")
+
+
+def extractCodeApis(codeStr):
+    """提取代码块中的自定义函数与非基础库函数/方法调用名。"""
+    defs = re.findall(r"\bdef\s+([A-Za-z_][A-Za-z0-9_]{2,})\s*\(", codeStr)
+    calls = re.findall(r"\.([A-Za-z_][A-Za-z0-9_]{2,})\s*\(", codeStr)
+    seen, out = set(), []
+    for name in defs + calls:
+        if name not in TRIVIAL_CODE_APIS and name not in seen:
+            seen.add(name)
+            out.append(name)
+    return out
+
+
+def checkCodeApiCoverage(sections, label):
+    """检查代码块中调用的库函数/自定义函数是否在前后正文逐一交代了用途。"""
+    warns = []
+    for secNum, _, blks in sections:
+        for idx, b in enumerate(blks):
+            if b.get("type") != "code" or b.get("lang") in ("bash", "syntax", "text"):
+                continue
+            apis = extractCodeApis(str(b.get("code") or b.get("text") or ""))
+            nearby = "\n".join(block_prose_text(x) for x in blks[max(0, idx - 1) : idx + 4])
+            missing = [a for a in apis if a not in nearby]
+            if len(missing) >= 3:
+                warns.append(f"[{label}] §{secNum} 代码调用了 {len(missing)} 个未在前后正文解释用途的函数（{', '.join(missing[:6])}），请按学习者水平逐一讲清用途与参数")
+    return warns
+
+
+def checkCodeOutputTerms(sections, label):
+    """拦截代码 print/result 输出中冒出但正文未交代的中英文标签（如'左簇均值'/'Left cluster mean'）。"""
+    warns = []
+    for secNum, _, blks in sections:
+        for idx, b in enumerate(blks):
+            if b.get("type") != "code":
+                continue
+            outSrc = re.sub(r"#.*", "", str(b.get("code") or b.get("text") or "")) + "\n" + str(b.get("result") or "")
+            labels = re.findall(r"([\u4e00-\u9fff]{3,8})\s*[:：]", outSrc) + re.findall(r"['\"]([A-Za-z][A-Za-z0-9 _-]{4,24})\s*[:：]", outSrc)
+            nearby = "\n".join(block_prose_text(x) for i, x in enumerate(blks[max(0, idx - 2) : idx + 3]) if i != min(2, idx)).lower()
+            unseen = [lb for lb in dict.fromkeys(labels) if lb.lower() not in nearby]
+            if unseen:
+                warns.append(f"[{label}] §{secNum} 代码输出了正文未交代含义的标签（{', '.join(unseen[:4])}），请先在正文讲清该概念再打印")
+    return warns
+
+
+def collectTaughtCorpus(sections):
+    """拼合本章已讲授的正文与代码文本（不含习题），用于检验习题知识闭环。"""
+    chunks = []
+    for _, _, blks in sections:
+        for b in blks:
+            chunks.append(block_prose_text(b))
+            if b.get("type") == "code":
+                chunks.append(str(b.get("code") or b.get("text") or ""))
+    return "\n".join(chunks)
+
+
+def checkQuizGrounding(ch, sections, label):
+    """检查习题考查的标识词/变量/接口是否确已在正文讲过，防止知识缺失假闭环。"""
+    corpus = collectTaughtCorpus(sections)
+    ex = ch.get("exercises") or {}
+    items = (ex.get("single_choice") or []) + (ex.get("short_answer") or [])
+    warns = []
+    for idx, it in enumerate(items, 1):
+        txt = f"{it.get('q', '')} {it.get('answer', '')}"
+        snippets = re.findall(r"`([^`]+)`", txt)
+        tokens = [w for sn in snippets for w in re.findall(r"\b[A-Za-z_][A-Za-z0-9_]{3,}\b", sn)]
+        missing = [t for t in dict.fromkeys(tokens) if t not in corpus]
+        if missing:
+            warns.append(f"[{label}] 习题第 {idx} 题考查了正文未出现过的标识符（{', '.join(missing[:3])}），疑似存在知识缺失或超纲，请补回正文或改题")
+    return warns
+
+
+def checkQuizDepth(ch, label):
+    """检查习题是否聚焦工程实践与现实问题诊断，避免停留在浅层背概念水平。"""
+    ex = ch.get("exercises") or {}
+    items = (ex.get("single_choice") or []) + (ex.get("short_answer") or [])
+    if not items:
+        return []
+    shallow = [i for i, it in enumerate(items, 1) if SHALLOW_QUIZ_RE.search(str(it.get("q", "")))]
+    practical = sum(1 for it in items if any(c in str(it.get("q", "")) for c in PRACTICAL_QUIZ_CUES))
+    warns = []
+    if shallow:
+        warns.append(f"[{label}] 习题第 {shallow} 题疑似停留在浅层概念背诵，建议改写为工程实践/现实场景诊断或定量推演题")
+    if practical / len(items) < 0.7:
+        warns.append(f"[{label}] 实战/场景诊断类习题占比偏低（{practical}/{len(items)}），建议至少 70% 聚焦工程实践或现实理论问题")
     return warns
 
 
