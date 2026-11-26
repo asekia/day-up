@@ -48,11 +48,13 @@ Whether opening *The Feynman Lectures on Physics*, Gilbert Strang's *Introductio
 
 ## 4. Zero-Jump Textbook Laws: Concept Budget, Anti-Defensive Derivation & Level-Matched Code
 
-### 1. Concept Budget & Book-Wide Concept Ledger (Zero Naked Terms or Magic Numbers)
+### 1. Concept Budget, Full-Depth-or-Omit & Zero Self-Coined Terms
 - **Hard cap of ≤ 3 new core concepts per section**: Never casually name-drop side terms. Prefer deleting non-core jargon in favor of plain action words, or deferring it to its dedicated chapter.
-- **Zero naked concepts, coined phrases, printed output labels, or forward references**: Every new concept, coined domain phrase (e.g., `Left cluster mean`, `broadcasting`), acronym, code `print(...)` label, or symbol **must be explained right before or where it first appears**. Never use a term naked early and define it later; prose must read smoothly without clicking any popover.
+- **Full-Depth-or-Omit (zero drive-by or postscript concepts)**: Never tack on a 1–2 sentence *"Finally, add one more parameter..."* note at the end of a section without full derivation. Every concept, parameter, or mechanism kept in the chapter must be explained completely (**failure without it → exact formula/mechanism → small-number or real-case walkthrough → trade-off/boundary**); if it does not merit that depth here, delete it and defer it to a later chapter.
+- **Zero self-coined "lore terms" or invented nicknames**: Never mint cutesy or metaphorical quoted aliases (e.g., `"The Packer"`, `"Filter Mask"`, `"Four-Piece Suit"`, `"Training Trilogy"`, `"Average Cat"`, or arbitrary invented demo labels). Stick strictly to **standard authoritative terminology** + **literal everyday prose**.
+- **Zero naked concepts, printed output labels, or forward references**: Every new concept, acronym, code `print(...)` label, or symbol **must be explained right before or where it first appears**. Never use a term naked early and define it later; prose must read smoothly without clicking any popover.
 - **Zero black-box magic numbers**: Every example score, metric, probability, price, or lab value must state **① who computed/measured it, ② how inputs produced it, ③ its scale and normal bounds**.
-- **No doubled term markers**: Never repeat a word right before `{{term:Word|...}}`; write **25–90 CJK chars (or ~20–50 English words)** of genuine micro-lesson explanation inside every gloss.
+- **No doubled term markers**: Never repeat a word right before `{{term:Word|...}}`; write **~20–50 English words (or 25–90 CJK chars)** of genuine micro-lesson explanation inside every gloss.
 
 ### 2. Ban "Defensive Textbook Writing": Zero-Jump Derivations & Level-Matched Code
 **What is "Defensive Textbook Writing"?** Afraid of appearing insufficiently rigorous, the author dumps advanced safeguards and formal caveats (`try/finally`, `clamp`, *"variational extremum"*, legal provisos, rare differentials) before the reader grasps the main path, then skips actual reasoning with *"rearranging gives / obviously / inevitably leads to."*
@@ -80,9 +82,10 @@ Every core section addresses: **① Why** (real friction before it existed), **�
 3. **10-second verification prompt**: Close with 1 ultra-light boundary check question;
 4. **Fold key blind spots back**: Update `learner_profile.json` and patch `chN.json` if a foundational gap surfaced.
 
-### 3. Practical, Grounded Quiz Standards (All Disciplines — Zero Knowledge Gaps, Zero Shallow Rote Recall!)
-1. **100% Strict Knowledge Grounding (Zero Gaps, Zero Wrong `ref`)**:
-   - Audit every word in `q`, all 4 `options`, `answer`, and `explain` against the chapter body—every concept, symbol, variable, and API tested must be explicitly taught in the chapter (and accurately located at `ref`). Never test an unmentioned variable/API (e.g., prose uses `sample`, quiz suddenly asks about unexplained `latents`). If a great question needs a missing premise, **add it to the prose first**!
+### 3. Practical, Deeply Grounded Quiz Standards (All Disciplines — Zero Passing-Mention Traps, Zero Shallow Rote Recall!)
+1. **100% Deep Knowledge Grounding (Zero Passing-Mention Questions, Zero Untaught Acronyms)**:
+   - Audit every concept, parameter, acronym, variable, and API across **`q`, all 4 `options`, `answer`, AND `explain`** against the exact section cited by `ref`;
+   - **Never test a drive-by or postscript mention**: A concept merely name-dropped in 1–2 sentences without formula/mechanism/walkthrough (e.g., tacking `shift` or `use_dynamic_shifting` onto the final paragraph, or slipping an untaught acronym like `OOM` into `explain`) **MUST NOT** be tested! Either promote that concept into a full-depth subsection with formula + concrete numbers, or remove it from the quiz and defer it to the chapter that actually teaches it.
 2. **Engineering Practice & Real-World Theoretical Depth (Ban Rote Definition Quizzes)**:
    - Ban shallow recall stems (*"Which of the following defines X?"*, *"List 3 differences between A and B"*);
    - **≥ 70% of single-choice and 100% of short-answer questions** must be **practical scenarios, fault diagnosis, quantitative calculations, counterfactual debugging, or real-world trade-off decisions**:
@@ -99,5 +102,6 @@ Every core section addresses: **① Why** (real friction before it existed), **�
 - [ ] **Smooth-Read Check**: Any podcast cliffhangers, > 1 em-dash per paragraph, > 36-char parenthetical nesting, inline code recitations, or name-dropped blog quotes?
 - [ ] **Causal Zipper Check**: Does each section open by catching the previous section's open boundary? Any concept appearing without prior need?
 - [ ] **Hands-On & Per-API Breakdown Check**: ≥ 2 real hands-on artifacts? Matched to `learner_profile.json`, is every non-trivial function/API called in code and every printed output label explained clearly?
-- [ ] **Anti-Defensive & Concept-Budget Check**: ≤ 3 new core concepts per section? Zero naked acronyms, coined phrases, or forward references? Zero skipped formula/causal leaps?
-- [ ] **Quiz Grounding & Depth Check**: Is every single tested term/identifier explicitly taught at `ref` (zero knowledge gaps)? Are ≥ 70% of MCQs and 100% of short-answers real engineering/domain diagnostic or quantitative problems rather than definition recall?
+- [ ] **Full-Depth-or-Omit & Zero-Coined-Terms Check**: Zero 1–2 sentence drive-by/postscript concept mentions? Zero self-coined quoted nicknames or playful aliases (only standard domain terms + literal everyday prose)?
+- [ ] **Anti-Defensive & Concept-Budget Check**: ≤ 3 new core concepts per section? Zero naked acronyms, printed labels, or forward references? Zero skipped formula/causal leaps?
+- [ ] **Deep Quiz Grounding & Depth Check**: Was every single concept, parameter, identifier, and acronym across `q`, `options`, `answer`, and `explain` taught in **full depth** inside its cited `ref` section (zero passing-mention traps or untaught acronyms)? Are ≥ 70% of MCQs and 100% of short-answers real engineering/domain diagnostic or quantitative problems?

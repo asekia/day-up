@@ -672,6 +672,8 @@ def validate_chapter(ch, source_name="<input>"):
     warnings.extend(checkNakedLatinTerms(sections, label))
     warnings.extend(checkCodeApiCoverage(sections, label))
     warnings.extend(checkCodeOutputTerms(sections, label))
+    warnings.extend(checkDriveByPostscripts(sections, label))
+    warnings.extend(checkCoinedTerms(sections, label))
     warnings.extend(checkQuizGrounding(ch, sections, label))
     warnings.extend(checkQuizDepth(ch, label))
     return errors, warnings
@@ -916,19 +918,86 @@ def collectTaughtCorpus(sections):
     return "\n".join(chunks)
 
 
+POSTSCRIPT_CUES = (
+    r"最后补一个", r"顺便提一句", r"顺带一提", r"顺口提一句", r"顺便补一个", r"最后提一句",
+    r"\bfinally,\s+(?:note|add)\s+one\s+more\b", r"\bas a bonus,\b", r"\bin passing,\b", r"\bby the way,\b",
+)
+COINED_TERM_PATTERNS = (
+    r"[“「][^”」]{1,6}(?:员|罩|件套|三部曲|三剑客|神器|大法|秘籍|管家|小助手|保姆|搬运工|传话筒)[”」]",
+    r"请出一位[^，。；\n]{0,14}[“「][^”」]{2,8}[”」]",
+    r"(?:训练|学习|推理)(?:三部曲|四件套|五件套|三剑客)",
+    r'["“](?:the\s+)?(?:packer|gatekeeper|filter\s+mask|four-piece(?:\s+suit)?|training\s+trilogy|magic\s+\w+|little\s+helper)["”]',
+)
+
+
+def checkDriveByPostscripts(sections, label):
+    """拦截段落末尾“顺嘴补一笔”却未展开公式/代码/拆解的半吊子概念。"""
+    warns = []
+    for secNum, _, blks in sections:
+        for idx, b in enumerate(blks):
+            if b.get("type") != "p":
+                continue
+            txt = str(b.get("text") or "")
+            hit = next((m.group(0) for pat in POSTSCRIPT_CUES for m in [re.search(pat, txt, re.IGNORECASE)] if m), None)
+            hasTerm = "{{term:" in txt or "`" in txt
+            backed = any(x.get("type") in ("eq", "code", "table", "enum") for x in blks[idx + 1 : idx + 3])
+            if hit and hasTerm and not backed:
+                warns.append(f"[{label}] §{secNum} 出现“顺嘴补一笔”的半吊子概念（'{hit}'），缺少公式/代码/拆解；请遵循“要么讲透、要么删掉留待后章”铁律")
+    return warns
+
+
+def checkCoinedTerms(sections, label):
+    """拦截自造设定词与引号花名，保持标准学科术语与朴素直白描述。"""
+    allTxt = "\n".join(block_prose_text(b) for _, _, blks in sections for b in blks)
+    hits = [m.group(0) for pat in COINED_TERM_PATTERNS for m in re.finditer(pat, allTxt, re.IGNORECASE)]
+    uniq = list(dict.fromkeys(hits))
+    if not uniq:
+        return []
+    return [f"[{label}] 检测到疑似自造设定词/引号花名（{', '.join(uniq[:4])}），请改用学科标准术语与朴素直白描述"]
+
+
+def extractQuizTokens(item, includeAll):
+    """提取习题中的反引号标识符与非基础缩写。"""
+    fields = [item.get("q", ""), item.get("answer", "")]
+    if includeAll:
+        fields.extend([item.get("explain", "")] + list(item.get("options") or []))
+    txt = " ".join(str(x) for x in fields)
+    codeToks = [w for sn in re.findall(r"`([^`]+)`", txt) for w in re.findall(r"\b[A-Za-z_][A-Za-z0-9_]{3,}\b", sn)]
+    acrs = [a for a in re.findall(r"\b[A-Z]{2,}[A-Za-z0-9]*\b", txt) if a not in IGNORED_ACRONYMS]
+    return list(dict.fromkeys(codeToks)), list(dict.fromkeys(acrs))
+
+
+def isTokenDeeplyTaught(token, sections):
+    """判定标识符是否在正文中被深入讲授（而非仅在 1 段顺嘴一提）。"""
+    hits, totalVis = 0, 0
+    for _, _, blks in sections:
+        for idx, b in enumerate(blks):
+            raw = str(b.get("code") or b.get("text") or "") if b.get("type") == "code" else block_prose_text(b)
+            vis = re.sub(r"\{\{term:([^|}]+)\|[^}]+\}\}", r"\1", raw)
+            if token not in vis:
+                continue
+            if b.get("type") in ("code", "eq", "table", "enum"):
+                return True
+            if any(x.get("type") in ("code", "eq", "table", "enum") for x in blks[max(0, idx - 1) : idx + 3]):
+                return True
+            hits, totalVis = hits + 1, totalVis + len(vis)
+    return hits >= 2 and totalVis >= 260
+
+
 def checkQuizGrounding(ch, sections, label):
-    """检查习题考查的标识词/变量/接口是否确已在正文讲过，防止知识缺失假闭环。"""
+    """检查习题考查的标识词/缩写是否已在正文深入讲透，拦截知识缺失与顺嘴提及出题。"""
     corpus = collectTaughtCorpus(sections)
-    ex = ch.get("exercises") or {}
-    items = (ex.get("single_choice") or []) + (ex.get("short_answer") or [])
+    items = ((ch.get("exercises") or {}).get("single_choice") or []) + ((ch.get("exercises") or {}).get("short_answer") or [])
     warns = []
     for idx, it in enumerate(items, 1):
-        txt = f"{it.get('q', '')} {it.get('answer', '')}"
-        snippets = re.findall(r"`([^`]+)`", txt)
-        tokens = [w for sn in snippets for w in re.findall(r"\b[A-Za-z_][A-Za-z0-9_]{3,}\b", sn)]
-        missing = [t for t in dict.fromkeys(tokens) if t not in corpus]
+        allIds, allAcrs = extractQuizTokens(it, True)
+        coreIds, _ = extractQuizTokens(it, False)
+        missing = [t for t in allIds + allAcrs if t not in corpus]
+        shallow = [t for t in coreIds if t in corpus and not isTokenDeeplyTaught(t, sections)]
         if missing:
-            warns.append(f"[{label}] 习题第 {idx} 题考查了正文未出现过的标识符（{', '.join(missing[:3])}），疑似存在知识缺失或超纲，请补回正文或改题")
+            warns.append(f"[{label}] 习题第 {idx} 题出现了正文从未讲过的标识词/缩写（{', '.join(missing[:3])}），存在知识缺失，请补回正文或改题")
+        if shallow:
+            warns.append(f"[{label}] 习题第 {idx} 题考查了正文仅一笔带过、未展开公式/代码/拆解的概念（{', '.join(shallow[:3])}），请先在正文细讲或删题")
     return warns
 
 

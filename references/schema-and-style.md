@@ -133,4 +133,4 @@ When served via `scripts/study_server.py`, the reader persists live state to `<b
 - **Built-in structural & pedagogical gates**:
   - Every section starts with a narrative paragraph `p` (never drops a bare box or formula cold);
   - Every chapter includes real visual diagrams, ≤ 35% callout density, closed-loop `{{fig:}}`/`{{tab:}}`/`{{eq:}}` references, and valid exercise `ref` pointers;
-  - Enforces concept budget (≤ 4 new terms per section), zero forward-referenced or naked jargon, zero unexplained code APIs or printed output labels, zero skipped derivations, and grounded practical quizzes.
+  - Enforces concept budget (≤ 4 new terms per section), full-depth-or-omit (flags tacked-on drive-by/postscript concept mentions), zero self-coined quoted nicknames, zero forward-referenced or naked jargon, zero unexplained code APIs or printed output labels, zero skipped derivations, and deep `ref`-section quiz grounding across `q`, `options`, `answer`, and `explain`.

@@ -124,4 +124,27 @@ Robotic prose isn't caused by advanced vocabulary—it's caused by **missing con
 
 ### 2. Book-Wide Concept Ledger (Zero Naked Terms, Zero Forward References)
 - Track two lists while outlining: **Already-Taught Whitelist** vs. **New Lead Concepts This Section (≤ 3)**.
-- **Post-draft highlighter audit**: Read from first word to last as a zero-background learner. Circle every technical noun (Chinese or English), every acronym, every symbol, and every label printed by code (`print(...)`). If it wasn't already taught earlier, either **cut it into plain language** or **explain it right on first appearance**. **Never use a concept naked in an earlier section and define it later.**
+- **Post-draft highlighter audit**: Read from first word to last as a zero-background learner. Circle every technical noun, every acronym, every symbol, and every label printed by code (`print(...)`). If it wasn't already taught earlier, either **cut it into plain language** or **explain it right on first appearance**. **Never use a concept naked in an earlier section and define it later.**
+
+### 3. Full-Depth-or-Omit Rule (Ban Drive-By & Postscript Concept Mentions)
+> A half-explained concept tacked onto the last paragraph of a section (*"Finally, note one more parameter..."*, *"By the way, distillation also cuts steps..."*) is worse than omitting it: the reader remembers the name, cannot use it, and gets ambushed if an exercise tests it.
+
+- **Every concept, parameter, or mechanism that survives into a chapter MUST pass the 4-Part Full-Depth Bar**:
+  1. **Concrete trigger**: What specific failure happens without it?
+  2. **Exact mechanism / formula / code**: Show the real math or step-by-step mechanics (never wave it away as *"a nonlinear mapping"* or *"an adaptive updater"*).
+  3. **Concrete numeric or real-world walkthrough**: Plug in 2–3 tiny numbers or trace one real case end-to-end.
+  4. **Explicit boundary / trade-off**: State its cost, side effect, or when to turn it off.
+- **Concrete contrast**:
+  - ❌ **Drive-by postscript**: *"Finally, note one more parameter called Timestep Shift (`shift = 3.0` or `use_dynamic_shifting`), which uses a nonlinear mapping to push more steps into high noise for high-resolution images."* (Reader has no idea *how* the mapping works, *why* higher resolution weakens noise, or what `3.0` actually changes!)
+  - ✅ **Full-depth or omit**: Either give it its own full `h4` subsection (explain why averaging more pixels raises SNR → write the exact formula $t' = \frac{s \cdot t}{1 + (s-1)t}$ → plug in $t=0.5, s=3.0 \to t'=0.75$ showing the midpoint shifts up into high noise → show when `use_dynamic_shifting` scales $s$ by resolution), **OR delete it completely from Chapter 1** and defer it to the high-resolution training chapter!
+
+### 4. Zero Self-Coined "Lore Terms" or Invented Nicknames
+> Classic textbooks (*CSAPP*, *Strang*, *Mankiw*, *Pathoma*) sound clear because they explain real concepts in literal everyday English—NOT because they invent cutesy proprietary nicknames in quotation marks.
+
+- **Strictly forbid minting custom nicknames or metaphorical stand-in labels** (e.g., `"The Packer"` for a VAE, `"The Filter Mask"` for a boolean mask, `"The Four-Piece Suit"` for a 4-stage pipeline, `"The Training Trilogy"` for `zero_grad/backward/step`, `"The Average Cat"`, or arbitrary custom labels invented only for a toy script).
+- **Use only two clean vocabularies**:
+  1. **Authoritative standard terminology** of the discipline (taught in full depth), and
+  2. **Plain, literal everyday prose** (concrete subjects and action verbs, zero cutesy quoted nicknames).
+- **Contrast**:
+  - ❌ *"We hire a `'Packer'` called VAE, then run the `'Training Trilogy'`, and apply a `'Filter Mask'` to inspect the `'Left Cluster Mean'`."*
+  - ✅ *"We first compress the image with a **Variational Autoencoder (VAE)**, run the three-line PyTorch gradient update (`zero_grad` → `backward` → `step`), and filter points with `x[:, 0] < 0` to check the average coordinates of the left target group."*
