@@ -674,6 +674,7 @@ def validate_chapter(ch, source_name="<input>"):
     warnings.extend(checkCodeOutputTerms(sections, label))
     warnings.extend(checkDriveByPostscripts(sections, label))
     warnings.extend(checkCoinedTerms(sections, label))
+    errors.extend(checkLatexRendering(ch, label))
     warnings.extend(checkQuizGrounding(ch, sections, label))
     warnings.extend(checkQuizDepth(ch, label))
     return errors, warnings
@@ -999,6 +1000,49 @@ def checkQuizGrounding(ch, sections, label):
         if shallow:
             warns.append(f"[{label}] 习题第 {idx} 题考查了正文仅一笔带过、未展开公式/代码/拆解的概念（{', '.join(shallow[:3])}），请先在正文细讲或删题")
     return warns
+
+
+def loadSupportedLatexCmds():
+    """从 ../assets/mathRenderer.js 提取内置渲染器支持的全部 LaTeX 指令集合。"""
+    jsPath = Path(__file__).resolve().parent.parent / "assets" / "mathRenderer.js"
+    if not jsPath.exists():
+        return None
+    src = jsPath.read_text(encoding="utf-8")
+    cmds = {"end"}
+    for blk in re.findall(r"const\s+(?:SYMBOL_MAP|FONT_CLASS_MAP|ACCENT_MAP|BAR_CLASS_MAP|SPECIAL_HANDLERS)\s*=\s*\{([\s\S]*?)\};", src):
+        cmds.update(re.findall(r"([A-Za-z]+)\s*:", blk))
+    for blk in re.findall(r"const\s+(?:OPERATOR_SET|SKIP_ONE_ARG)\s*=\s*new\s+Set\(\[([\s\S]*?)\]\);", src):
+        cmds.update(re.findall(r'"([A-Za-z]+)"', blk))
+    return cmds
+
+
+def collectMathExprs(ch):
+    """提取全章 eq 块以及正文、习题中的所有行内 $...$ 公式片段。"""
+    exprs = [str(b.get("text") or "") for _, _, blks in iter_chapter_blocks(ch) for b in blks if b.get("type") == "eq"]
+    texts = extract_prose_texts(ch)
+    ex = ch.get("exercises") or {}
+    for it in (ex.get("single_choice") or []) + (ex.get("short_answer") or []):
+        texts.extend([str(it.get(k) or "") for k in ("q", "answer", "explain")] + [str(o) for o in (it.get("options") or [])])
+    for t in texts:
+        exprs.extend(re.findall(r"\$([^$\n]+?)\$", strip_inline_code(t)))
+    return exprs
+
+
+def checkLatexRendering(ch, label):
+    """拦截不被内置公式渲染器支持的 LaTeX 指令与花括号失配，杜绝公式乱码。"""
+    supported = loadSupportedLatexCmds()
+    if not supported:
+        return []
+    unknown, unbalanced = set(), []
+    for expr in collectMathExprs(ch):
+        clean = re.sub(r"\\[{}]", "", expr)
+        if clean.count("{") != clean.count("}"):
+            unbalanced.append(expr[:48])
+        for cmd in re.findall(r"\\([A-Za-z]+)", expr):
+            if cmd not in supported:
+                unknown.add("\\" + cmd)
+    errs = [f"[{label}] 公式含渲染器不支持的 LaTeX 指令（{', '.join(sorted(unknown)[:6])}），请改用标准受支持指令或 Unicode 符号"] if unknown else []
+    return errs + ([f"[{label}] 公式存在未闭合花括号：{unbalanced[0]!r}"] if unbalanced else [])
 
 
 def checkQuizDepth(ch, label):

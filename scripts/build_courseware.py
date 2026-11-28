@@ -123,7 +123,9 @@ def main():
     fw_dir = Path(args.framework_dir) if args.framework_dir else SKILL_ASSETS
     tpl = (fw_dir / "template.html").read_text(encoding="utf-8")
     css = (fw_dir / "courseware.css").read_text(encoding="utf-8")
-    js = (fw_dir / "courseware.js").read_text(encoding="utf-8")
+    math_path = fw_dir / "mathRenderer.js"
+    math_js = math_path.read_text(encoding="utf-8") + "\n" if math_path.exists() else ""
+    js = math_js + (fw_dir / "courseware.js").read_text(encoding="utf-8")
 
     # 防止 JSON 字符串中的 </script> 提前闭合 script 标签
     data_json = json.dumps(payload, ensure_ascii=False, indent=2).replace("</", "<\\/")

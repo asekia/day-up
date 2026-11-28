@@ -522,92 +522,11 @@
   }
 
   /* ======================== 零依赖出版级数学公式排版 ======================== */
-  function renderMathHtml(raw) {
-    let s = escHtml(raw == null ? "" : String(raw));
-    // 必须按命令长度降序匹配，并加 (?![a-zA-Z]) 防止 \le 误吃 \left！
-    const syms = [
-      ["\\\\mathbb\\{E\\}", "𝔼"],
-      ["\\\\mathbb\\{R\\}", "ℝ"],
-      ["\\\\mathbb\\{P\\}", "ℙ"],
-      ["\\\\mathcal\\{L\\}", "ℒ"],
-      ["\\\\mathcal\\{D\\}", "𝒟"],
-      ["\\\\varepsilon(?![a-zA-Z])", "ε"],
-      ["\\\\epsilon(?![a-zA-Z])", "ε"],
-      ["\\\\partial(?![a-zA-Z])", "∂"],
-      ["\\\\approx(?![a-zA-Z])", "≈"],
-      ["\\\\lambda(?![a-zA-Z])", "λ"],
-      ["\\\\varphi(?![a-zA-Z])", "φ"],
-      ["\\\\mapsto(?![a-zA-Z])", "↦"],
-      ["\\\\qquad(?![a-zA-Z])", "　　"],
-      ["\\\\sigma(?![a-zA-Z])", "σ"],
-      ["\\\\theta(?![a-zA-Z])", "θ"],
-      ["\\\\gamma(?![a-zA-Z])", "γ"],
-      ["\\\\delta(?![a-zA-Z])", "δ"],
-      ["\\\\Delta(?![a-zA-Z])", "Δ"],
-      ["\\\\alpha(?![a-zA-Z])", "α"],
-      ["\\\\omega(?![a-zA-Z])", "ω"],
-      ["\\\\infty(?![a-zA-Z])", "∞"],
-      ["\\\\nabla(?![a-zA-Z])", "∇"],
-      ["\\\\times(?![a-zA-Z])", "×"],
-      ["\\\\right(?![a-zA-Z])", ""],
-      ["\\\\left(?![a-zA-Z])", ""],
-      ["\\\\Vert(?![a-zA-Z])", "‖"],
-      ["\\\\cdot(?![a-zA-Z])", "·"],
-      ["\\\\beta(?![a-zA-Z])", "β"],
-      ["\\\\prod(?![a-zA-Z])", "∏"],
-      ["\\\\quad(?![a-zA-Z])", "　"],
-      ["\\\\succ(?![a-zA-Z])", "≻"],
-      ["\\\\prec(?![a-zA-Z])", "≺"],
-      ["\\\\sum(?![a-zA-Z])", "∑"],
-      ["\\\\int(?![a-zA-Z])", "∫"],
-      ["\\\\neq(?![a-zA-Z])", "≠"],
-      ["\\\\sim(?![a-zA-Z])", "∼"],
-      ["\\\\mid(?![a-zA-Z])", " | "],
-      ["\\\\phi(?![a-zA-Z])", "φ"],
-      ["\\\\eta(?![a-zA-Z])", "η"],
-      ["\\\\ast(?![a-zA-Z])", "*"],
-      ["\\\\Big(?![a-zA-Z])", ""],
-      ["\\\\big(?![a-zA-Z])", ""],
-      ["\\\\le(?![a-zA-Z])", "≤"],
-      ["\\\\ge(?![a-zA-Z])", "≥"],
-      ["\\\\ll(?![a-zA-Z])", "≪"],
-      ["\\\\gg(?![a-zA-Z])", "≫"],
-      ["\\\\to(?![a-zA-Z])", "→"],
-      ["\\\\mu(?![a-zA-Z])", "μ"],
-      ["\\\\pi(?![a-zA-Z])", "π"],
-      ["\\\\\\|", "‖"],
-      ["\\\\,", " "],
-      ["\\\\;", " "],
-    ];
-    syms.forEach(([pat, rep]) => {
-      s = s.replace(new RegExp(pat, "g"), rep);
-    });
-
-    // \mathrm{...} / \text{...} / \operatorname{...}
-    s = s.replace(/\\(?:mathrm|text|operatorname)\{([^}]+)\}/g, '<span class="math-op">$1</span>');
-    // 常用正体算子 \log, \exp, \max, \min, \arg
-    s = s.replace(/\\(log|exp|max|min|arg|lim|sup|inf|softmax|sigmoid)(?![a-zA-Z])/g, '<span class="math-op">$1</span>');
-
-    // \frac{a}{b} 或 \tfrac{a}{b}（支持三层嵌套）
-    for (let k = 0; k < 3; k++) {
-      s = s.replace(/\\t?frac\{([^{}]+)\}\{([^{}]+)\}/g, '<span class="math-frac"><span class="math-frac-num">$1</span><span class="math-frac-den">$2</span></span>');
+  function renderMathHtml(raw, alreadyEscaped) {
+    if (typeof window !== "undefined" && typeof window.dayUpRenderMath === "function") {
+      return window.dayUpRenderMath(raw, alreadyEscaped);
     }
-
-    // 显式花括号上下标：_{...} / ^{...}
-    s = s.replace(/_\{([^{}]+)\}/g, "<sub>$1</sub>");
-    s = s.replace(/\^\{([^{}]+)\}/g, "<sup>$1</sup>");
-
-    // 期望裸下标特例：E_y~π(y|x) 或 𝔼_y~π(y|x)
-    s = s.replace(/(𝔼|E)_(y[~∼][^\s\[]+)/g, "$1<sub>$2</sub>");
-
-    // 常见 ASCII 裸上下标（严禁吞掉函数括号 (y|x)）
-    s = s.replace(/\^(\([^)]+\)|[+\-*0-9a-zA-Z]+)/g, "<sup>$1</sup>");
-    s = s.replace(/([A-Za-zπσθφβγδαΔℒ𝒟𝔼*])_(&lt;[A-Za-z0-9]+|[A-Za-z0-9θφπ]+)/g, "$1<sub>$2</sub>");
-
-    // 美化波浪号与减号
-    s = s.replace(/~/g, "∼");
-    s = s.replace(/\s-\s/g, " − ");
-    return s;
+    return escHtml(raw == null ? "" : String(raw));
   }
 
   /* ======================== 行内标记与块渲染 ======================== */
@@ -647,9 +566,9 @@
       );
     });
 
-    // 3. 行内公式 $...$（保护进 stash）
+    // 3. 行内公式 $...$（保护进 stash，并传 alreadyEscaped=true 避免 < > 双重转义）
     s = s.replace(/\$([^$\n]+?)\$/g, (_, expr) =>
-      put(`<span class="math-inline">${renderMathHtml(expr)}</span>`)
+      put(`<span class="math-inline">${renderMathHtml(expr, true)}</span>`)
     );
 
     // 4. 自动美化正文里裸写的常见数学下标（含 𝔼_{...}、π_sft、J_B、J_C、π_ref、D_KL 等）
